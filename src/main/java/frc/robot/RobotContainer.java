@@ -41,6 +41,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.intake;
 import frc.robot.subsystems.LimelightHelpers.PoseEstimate;
+import frc.robot.util.HitecServo;
 
 public class RobotContainer {
     
@@ -48,6 +49,7 @@ public class RobotContainer {
 
     //private final LRServo m_servoSubsystem = new LRServo(0);
     private final intake intake = new intake();
+    private final HitecServo hitecServo = new HitecServo(1);
     //private final SendableChooser<Command> autoChooser;
 
 
@@ -225,6 +227,9 @@ public class RobotContainer {
         */
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(new runIntake(intake, 0.5));
+
+        joystick.x().onTrue(new setServoPosition(hitecServo, 0));
+        joystick.y().onTrue(new setServoPosition(hitecServo, 1));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
