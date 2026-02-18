@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ShootStart"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "IntakePos"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SweepShoot3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3Return"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ReturnShoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ClimbReturn"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "BottomStart",
+  "choreoAuto": false
+}
