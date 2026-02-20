@@ -17,12 +17,16 @@ public class Climber extends SubsystemBase {
   private TalonFX motorRight;
   private Servo door;
   private Servo deploy;
+  private boolean doorStatus; // true = open
+  private boolean deployStatus; // true = out
 
   public Climber() {
     motorLeft = new TalonFX(Constants.CAN_IDS.climberMotorLeft);
     motorRight = new TalonFX(Constants.CAN_IDS.climberMotorRight);
     door = new Servo(Constants.Channels.door);
     deploy = new Servo(Constants.Channels.deploy);
+    doorStatus = false;
+    deployStatus = false;
 
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
@@ -50,6 +54,8 @@ public class Climber extends SubsystemBase {
       door.set(1);
     else
       door.set(0);
+    doorStatus = open;
+    
   }
 
    public void setDeploy(boolean out)
@@ -58,6 +64,17 @@ public class Climber extends SubsystemBase {
       deploy.set(1);
     else
       deploy.set(0);
+    deployStatus = out;
+  }
+
+  public boolean doorStatus()
+  {
+    return doorStatus;
+  }
+  
+  public boolean deployStatus()
+  {
+    return deployStatus;
   }
 }
 

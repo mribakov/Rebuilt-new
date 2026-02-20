@@ -17,7 +17,7 @@ public class ClimberDoor extends Command {
 
   @Override
   public void initialize() {
-    climb.setDeploy(open);
+    climb.setDoor(open);
   }
 
   @Override
