@@ -8,16 +8,21 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
   private TalonFX motorLeft;
   private TalonFX motorRight;
+  private Servo door;
+  private Servo deploy;
 
   public Climber() {
     motorLeft = new TalonFX(Constants.CAN_IDS.climberMotorLeft);
     motorRight = new TalonFX(Constants.CAN_IDS.climberMotorRight);
+    door = new Servo(Constants.Channels.door);
+    deploy = new Servo(Constants.Channels.deploy);
 
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
@@ -38,4 +43,22 @@ public class Climber extends SubsystemBase {
   public double getPosition() {
     return motorLeft.getPosition().getValueAsDouble(); // TODO replace with math
   }
+
+  public void setDoor(boolean open)
+  {
+    if (open)
+      door.set(1);
+    else
+      door.set(0);
+  }
+
+   public void setDeploy(boolean out)
+  {
+    if (out)
+      deploy.set(1);
+    else
+      deploy.set(0);
+  }
 }
+
+
