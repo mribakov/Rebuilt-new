@@ -6,12 +6,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.hal.PWMConfigDataResult;
 import edu.wpi.first.math.MathUtil;
 
-public class LRServo extends Servo {
+public class LinearServo extends Servo {
     double curPos;
 
-    public LRServo(int channel) {
+    public LinearServo(int channel, int minPulse, int maxPulse) {
         super(0);
-        setBoundsMicroseconds(2000, 0, 0, 0, 1000);
+        setBoundsMicroseconds(maxPulse, 0, 0, 0, minPulse);
         curPos = 0;
         setPosition(curPos);
     }

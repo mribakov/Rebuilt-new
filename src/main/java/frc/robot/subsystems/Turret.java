@@ -13,14 +13,16 @@ import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.HiTecServo;
+import frc.robot.util.LinearServo;
 
 public class Turret extends SubsystemBase {
 
   private TalonFX motorLeft;
   private TalonFX motorRight;
   private TalonFX motorRotator;
-  private Servo motorHoodLeft;
-  private Servo motorHoodRight;
+  private LinearServo motorHoodLeft;
+  private LinearServo motorHoodRight;
   private double targetVelocity;
 
   public Turret() {
@@ -28,8 +30,8 @@ public class Turret extends SubsystemBase {
     motorRight = new TalonFX(Constants.CAN_IDS.turretMotorRight);
     motorRotator = new TalonFX(Constants.CAN_IDS.turretMotorRotator);
 
-    motorHoodLeft = new Servo(Constants.Channels.motorHoodLeft);
-    motorHoodRight = new Servo(Constants.Channels.motorHoodRight);
+    motorHoodLeft = new HiTecServo(Constants.Channels.motorHoodLeft);
+    motorHoodRight = new HiTecServo(Constants.Channels.motorHoodRight);
 
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output

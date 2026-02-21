@@ -11,20 +11,22 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.ActuonixServo;
+import frc.robot.util.LinearServo;
 
 public class Climber extends SubsystemBase {
   private TalonFX motorLeft;
   private TalonFX motorRight;
-  private Servo door;
-  private Servo deploy;
+  private LinearServo door;
+  private LinearServo deploy;
   private boolean doorStatus; // true = open
   private boolean deployStatus; // true = out
 
   public Climber() {
     motorLeft = new TalonFX(Constants.CAN_IDS.climberMotorLeft);
     motorRight = new TalonFX(Constants.CAN_IDS.climberMotorRight);
-    door = new Servo(Constants.Channels.door);
-    deploy = new Servo(Constants.Channels.deploy);
+    door = new ActuonixServo(Constants.Channels.door);
+    deploy = new ActuonixServo(Constants.Channels.deploy);
     doorStatus = false;
     deployStatus = false;
 

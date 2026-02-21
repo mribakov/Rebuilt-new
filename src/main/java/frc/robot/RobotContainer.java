@@ -21,9 +21,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.util.HitecServo;
+import frc.robot.util.LinearServo;
 import frc.robot.subsystems.*;
-import frc.robot.util.ServoSystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -52,7 +51,6 @@ public class RobotContainer {
     // drivetrain
     private final Field2d field;
 
-    private final ServoSystem m_servoSubsystem = new ServoSystem();
     //private final SendableChooser<Command> autoChooser;
 
 
@@ -136,9 +134,7 @@ public class RobotContainer {
 
         // actual buttons for systems testing
         joystick.leftTrigger().onTrue(new ClimbDown(climber));
-        joystick.rightTrigger().onTrue(new ClimbLvl1(climber));
-        joystick.leftBumper().onTrue(new ClimbLvl2(climber));
-        joystick.rightBumper().onTrue(new ClimbLvl3(climber));
+        joystick.rightTrigger().onTrue(new ClimbUp(climber));
         
         joystick.y().onTrue(new DeployIntake(intake));
         joystick.x().onTrue(new RetractIntake(intake));
