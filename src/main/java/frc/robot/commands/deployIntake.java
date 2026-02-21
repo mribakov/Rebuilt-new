@@ -5,12 +5,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.intake;
+import frc.robot.subsystems.Intake;
 
 public class deployIntake extends Command {
-  private intake intake;
+  private Intake intake;
 
-  public deployIntake(intake in) {
+  public deployIntake(Intake in) {
     intake = in;
     addRequirements(in);
   }
