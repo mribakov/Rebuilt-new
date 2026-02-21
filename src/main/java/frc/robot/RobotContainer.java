@@ -135,19 +135,19 @@ public class RobotContainer {
         //configureDrivetrain();
 
         // actual buttons for systems testing
-        joystick.leftTrigger().onTrue(new climbDown(climber));
+        joystick.leftTrigger().onTrue(new ClimbDown(climber));
         joystick.rightTrigger().onTrue(new ClimbLvl1(climber));
         joystick.leftBumper().onTrue(new ClimbLvl2(climber));
         joystick.rightBumper().onTrue(new ClimbLvl3(climber));
         
-        joystick.y().onTrue(new deployIntake(intake));
-        joystick.x().onTrue(new retractIntake(intake));
-        joystick.a().whileTrue(new runIntake(intake));
-        joystick.b().whileTrue(new runOuttake(intake));
+        joystick.y().onTrue(new DeployIntake(intake));
+        joystick.x().onTrue(new RetractIntake(intake));
+        joystick.a().whileTrue(new RunIntake(intake));
+        joystick.b().whileTrue(new RunOuttake(intake));
 
-        joystick.povDown().onTrue(new spinToSpeed(turret, 0));
-        joystick.povRight().onTrue(new spinToSpeed(turret, 800));
-        joystick.povUp().whileTrue(new shoot(turret, trigger));
+        joystick.povDown().onTrue(new SpinToSpeed(turret, 0));
+        joystick.povRight().onTrue(new SpinToSpeed(turret, 800));
+        joystick.povUp().whileTrue(new Shoot(turret, trigger));
 
         joystick.povLeft().onTrue(new ClimberDoor(climber, !climber.doorStatus()));
         joystick.start().onTrue(new DeployClimber(climber, !climber.deployStatus()));

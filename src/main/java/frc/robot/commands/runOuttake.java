@@ -9,10 +9,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Intake;
 
-public class runOuttake extends Command {
+public class RunOuttake extends Command {
   Intake intake;
   
-  public runOuttake(Intake in) {
+  public RunOuttake(Intake in) {
    intake = in;
    addRequirements(in);
   }
