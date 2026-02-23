@@ -15,6 +15,7 @@ public class Intake extends SubsystemBase {
   private TalonFX motorLeft;
   private TalonFX motorRight;
   private TalonFX deployMotor;
+  private final double gearRatio;
 
   public Intake() {
     motorLeft = new TalonFX(Constants.CAN_IDS.intakeMotorLeft);
@@ -27,14 +28,17 @@ public class Intake extends SubsystemBase {
     slot0Configs.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
 
     deployMotor.getConfigurator().apply(slot0Configs);
+    gearRatio = 9;
   }
 
   public void deploy() {
-    final PositionVoltage m_request = new PositionVoltage(Constants.Intake.deployPosition).withSlot(0);
+    // position unit is rotations of the motor
+    final PositionVoltage m_request = new PositionVoltage((Constants.Intake.deployPosition / 360) * gearRatio).withSlot(0);
     deployMotor.setControl(m_request);
   }
 
   public void retract() {
+    // no math needed because it is zero
     final PositionVoltage m_request = new PositionVoltage(Constants.Intake.homePosition).withSlot(0);
     deployMotor.setControl(m_request);
   }

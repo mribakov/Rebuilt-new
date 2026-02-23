@@ -24,6 +24,7 @@ public class Turret extends SubsystemBase {
   private LinearServo motorHoodLeft;
   private LinearServo motorHoodRight;
   private double targetVelocity;
+  private final double gearRatio;
 
   public Turret() {
     motorLeft = new TalonFX(Constants.CAN_IDS.turretMotorLeft);
@@ -49,6 +50,7 @@ public class Turret extends SubsystemBase {
     motorRight.getConfigurator().apply(spinMotorConfigs);
 
     targetVelocity = 0;
+    gearRatio = 50;
   }
 
   public void rotate(double speed) {
@@ -61,7 +63,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void rotateTo(double degree) {
-    double position = degree; // TODO replace with math
+    double position = (degree / 360) * gearRatio;
     final PositionVoltage m_request = new PositionVoltage(position).withSlot(0);
     motorRotator.setControl(m_request);
   }
@@ -72,11 +74,11 @@ public class Turret extends SubsystemBase {
   }
 
   public void spin(double speed) {
-    double velocity = speed; //TODO replace with math
-    targetVelocity = velocity;
-    final VelocityVoltage m_request = new VelocityVoltage(velocity).withSlot(0);
-    motorLeft.setControl(m_request.withVelocity(velocity).withFeedForward(0.5));
-    motorRight.setControl(m_request.withVelocity(velocity).withFeedForward(0.5));
+    // velocity unit is rev per sec of the motor
+    targetVelocity = speed; // gear ratio is 1:1 so no math needed
+    final VelocityVoltage m_request = new VelocityVoltage(targetVelocity).withSlot(0).withFeedForward(0.5);
+    motorLeft.setControl(m_request);
+    motorRight.setControl(m_request);
   }
 
   public boolean isAtSpeed()
@@ -94,11 +96,11 @@ public class Turret extends SubsystemBase {
   }
 
   public double getAngle() {
-    return motorRotator.getPosition().getValueAsDouble(); // TODO replace with math
+    return (motorRotator.getPosition().getValueAsDouble() / gearRatio) * 360;
   }
 
   public double getSpeed() {
-    return motorLeft.getVelocity().getValueAsDouble(); // TODO replace with math
+    return motorLeft.getVelocity().getValueAsDouble();
   }
 
   public void runAtPower(double power)

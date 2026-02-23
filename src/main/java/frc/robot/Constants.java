@@ -46,7 +46,7 @@ public class Constants {
     }
 
     public class Intake {
-        public static final double deployPosition = 0;
+        public static final double deployPosition = 90; // angle in degrees
         public static final double homePosition = 0;
         public static final double intakeSpeed = 0;
     }
