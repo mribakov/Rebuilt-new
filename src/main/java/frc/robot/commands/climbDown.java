@@ -3,23 +3,23 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Elevator;
 
 public class ClimbDown extends Command {
-  private Climber climb;
+  private Elevator climb;
 
-  public ClimbDown(Climber climber) {
+  public ClimbDown(Elevator climber) {
     climb = climber;
     addRequirements(climb);
   }
 
   @Override
   public void initialize() {
-    climb.setPosition(Constants.Climber.homePosition);
+    climb.goToSetpoint(() -> {return Elevator.Setpoint.Ground;});
   }
 
   @Override
   public boolean isFinished() {
-    return Math.abs(climb.getPosition() - Constants.Climber.homePosition) < Constants.Climber.climbThreshold;
+    return Math.abs(climb.getPosition().magnitude() - Elevator.Setpoint.Ground.target.magnitude()) <= Constants.Climber.threshold; // meeseeks
   }
 }

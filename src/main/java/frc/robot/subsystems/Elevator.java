@@ -35,6 +35,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
+import frc.robot.util.ActuonixServo;
+import frc.robot.util.LinearServo;
 
 public class Elevator extends SubsystemBase {
     /** Position setpoints for the elevator. */
@@ -52,11 +55,17 @@ public class Elevator extends SubsystemBase {
             this.target = target;
             this.targetDist = kDrumRadius.times(target.in(Radians));
         }
+
         private Setpoint(Distance target) {
             this.target = Radians.of(target.div(kDrumRadius).magnitude());
             this.targetDist = target;
         }
     }
+
+    private LinearServo door;
+    private LinearServo deploy;
+    private boolean doorStatus; // true = open
+    private boolean deployStatus; // true = out
 
     private static final int kNumConfigAttempts = 2;
 
@@ -77,20 +86,20 @@ public class Elevator extends SubsystemBase {
     private final MotionMagicVoltage setpointRequest = new MotionMagicVoltage(0);
     private final DutyCycleOut manualRequest = new DutyCycleOut(0);
     private final DutyCycleOut calibrationRequest = new DutyCycleOut(-0.1)
-        .withIgnoreHardwareLimits(true)
-        .withIgnoreSoftwareLimits(true);
+            .withIgnoreHardwareLimits(true)
+            .withIgnoreSoftwareLimits(true);
 
     /** Trigger to detect when the elevator drives into a hard stop. */
     public final Trigger isHardStop = new Trigger(() -> {
         return motor_id_20Velocity.getValue().abs(RotationsPerSecond) < 1 &&
-            motor_id_20TorqueCurrent.getValue().abs(Amps) > 10;
+                motor_id_20TorqueCurrent.getValue().abs(Amps) > 10;
     }).debounce(0.1);
 
     /* simulation */
     private final ElevatorSim elevatorSim_motor_id_20 = new ElevatorSim(
-        DCMotor.getKrakenX60Foc(1),
-        kGearRatio, 5, kDrumRadius.in(Meters),
-        0.0, kMaxHeight.in(Meters), true, 0.0);
+            DCMotor.getKrakenX60Foc(1),
+            kGearRatio, 5, kDrumRadius.in(Meters),
+            0.0, kMaxHeight.in(Meters), true, 0.0);
 
     private static final double kSimLoopPeriod = 0.002; // 2 ms
     private Notifier simNotifier = null;
@@ -99,7 +108,7 @@ public class Elevator extends SubsystemBase {
     /* Mechanism2d visualization of the elevator */
     private final Mechanism2d mech2d = new Mechanism2d(1, kMaxHeight.in(Meters));
     private final MechanismLigament2d motor_id_20Mech2d = mech2d.getRoot("motor_id_20 Root", 0.500, 0)
-        .append(new MechanismLigament2d("motor_id_20", elevatorSim_motor_id_20.getPositionMeters(), 90));
+            .append(new MechanismLigament2d("motor_id_20", elevatorSim_motor_id_20.getPositionMeters(), 90));
 
     /** Configs common across all motors. */
     private static final TalonFXConfiguration motorInitialConfigs = new TalonFXConfiguration();
@@ -109,55 +118,49 @@ public class Elevator extends SubsystemBase {
 
     /** Configs for {@link #motor_id_20}. */
     private final TalonFXConfiguration motor_id_20Configs = leaderInitialConfigs.clone()
-        .withMotorOutput(
-            leaderInitialConfigs.MotorOutput.clone()
-                .withNeutralMode(NeutralModeValue.Coast)
-        )
-        .withCurrentLimits(
-            leaderInitialConfigs.CurrentLimits.clone()
-                .withStatorCurrentLimit(Amps.of(120))
-                .withStatorCurrentLimitEnable(true)
-        )
-        .withSlot0(
-            leaderInitialConfigs.Slot0.clone()
-                .withKP(67.5)
-                .withKI(0)
-                .withKD(0)
-                .withKS(0.2)
-                .withKV(2.025)
-                .withKA(0)
-                .withKG(0)
-                .withGravityType(GravityTypeValue.Elevator_Static)
-        )
-        .withFeedback(
-            leaderInitialConfigs.Feedback.clone()
-                .withSensorToMechanismRatio(16.875)
-        )
-        .withHardwareLimitSwitch(
-            leaderInitialConfigs.HardwareLimitSwitch.clone()
-                .withForwardLimitEnable(true)
-                .withForwardLimitAutosetPositionEnable(false)
-                .withForwardLimitRemoteSensorID(0)
-                .withForwardLimitSource(ForwardLimitSourceValue.LimitSwitchPin)
-                .withForwardLimitType(ForwardLimitTypeValue.NormallyOpen)
-                .withReverseLimitAutosetPositionEnable(false)
-                .withReverseLimitEnable(true)
-                .withReverseLimitRemoteSensorID(0)
-                .withReverseLimitSource(ReverseLimitSourceValue.LimitSwitchPin)
-                .withReverseLimitType(ReverseLimitTypeValue.NormallyOpen)
-        )
-        .withMotionMagic(
-            leaderInitialConfigs.MotionMagic.clone()
-                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(4.7407407407407405))
-                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(23.703703703703702))
-        );
+            .withMotorOutput(
+                    leaderInitialConfigs.MotorOutput.clone()
+                            .withNeutralMode(NeutralModeValue.Coast))
+            .withCurrentLimits(
+                    leaderInitialConfigs.CurrentLimits.clone()
+                            .withStatorCurrentLimit(Amps.of(120))
+                            .withStatorCurrentLimitEnable(true))
+            .withSlot0(
+                    leaderInitialConfigs.Slot0.clone()
+                            .withKP(67.5)
+                            .withKI(0)
+                            .withKD(0)
+                            .withKS(0.2)
+                            .withKV(2.025)
+                            .withKA(0)
+                            .withKG(0)
+                            .withGravityType(GravityTypeValue.Elevator_Static))
+            .withFeedback(
+                    leaderInitialConfigs.Feedback.clone()
+                            .withSensorToMechanismRatio(16.875))
+            .withHardwareLimitSwitch(
+                    leaderInitialConfigs.HardwareLimitSwitch.clone()
+                            .withForwardLimitEnable(true)
+                            .withForwardLimitAutosetPositionEnable(false)
+                            .withForwardLimitRemoteSensorID(0)
+                            .withForwardLimitSource(ForwardLimitSourceValue.LimitSwitchPin)
+                            .withForwardLimitType(ForwardLimitTypeValue.NormallyOpen)
+                            .withReverseLimitAutosetPositionEnable(false)
+                            .withReverseLimitEnable(true)
+                            .withReverseLimitRemoteSensorID(0)
+                            .withReverseLimitSource(ReverseLimitSourceValue.LimitSwitchPin)
+                            .withReverseLimitType(ReverseLimitTypeValue.NormallyOpen))
+            .withMotionMagic(
+                    leaderInitialConfigs.MotionMagic.clone()
+                            .withMotionMagicCruiseVelocity(RotationsPerSecond.of(4.7407407407407405))
+                            .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(23.703703703703702)));
 
     public Elevator() {
         for (int i = 0; i < kNumConfigAttempts; ++i) {
             var status = motor_id_20.getConfigurator().apply(motor_id_20Configs);
-            if (status.isOK()) break;
+            if (status.isOK())
+                break;
         }
-
 
         /* set the default command to neutral output */
         setDefaultCommand(manualDrive(() -> 0.0));
@@ -169,6 +172,11 @@ public class Elevator extends SubsystemBase {
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        door = new ActuonixServo(Constants.Channels.door);
+        deploy = new ActuonixServo(Constants.Channels.deploy);
+        doorStatus = false;
+        deployStatus = false;
     }
 
     /**
@@ -198,9 +206,7 @@ public class Elevator extends SubsystemBase {
      * @return Command to run
      */
     public Command holdPosition() {
-        return runOnce(() ->
-            setpointRequest.withPosition(motor_id_20Position.getValue())
-        ).andThen(run(() -> {
+        return runOnce(() -> setpointRequest.withPosition(motor_id_20Position.getValue())).andThen(run(() -> {
             motor_id_20.setControl(setpointRequest);
         }));
     }
@@ -242,27 +248,24 @@ public class Elevator extends SubsystemBase {
         return run(() -> {
             motor_id_20.setControl(calibrationRequest);
         })
-        .until(isHardStop)
-        .andThen(
-            manualDrive(() -> 0.0).withTimeout(0.25)
-                .finallyDo(() -> {
-                    motor_id_20.setPosition(Rotations.of(0));
-                })
-        );
+                .until(isHardStop)
+                .andThen(
+                        manualDrive(() -> 0.0).withTimeout(0.25)
+                                .finallyDo(() -> {
+                                    motor_id_20.setPosition(Rotations.of(0));
+                                }));
     }
 
     @Override
     public void periodic() {
         /* refresh all status signals */
         BaseStatusSignal.refreshAll(
-            motor_id_20Position,
-            motor_id_20Velocity,
-            motor_id_20TorqueCurrent
-        );
+                motor_id_20Position,
+                motor_id_20Velocity,
+                motor_id_20TorqueCurrent);
 
         motor_id_20Mech2d.setLength(
-            motor_id_20Position.getValueAsDouble() * kDrumRadius.in(Meters) * 2 * Math.PI
-        );
+                motor_id_20Position.getValueAsDouble() * kDrumRadius.in(Meters) * 2 * Math.PI);
     }
 
     private void startSimThread() {
@@ -287,14 +290,40 @@ public class Elevator extends SubsystemBase {
             elevatorSim_motor_id_20.setInputVoltage(motor_id_20Sim.getMotorVoltage());
             elevatorSim_motor_id_20.update(deltaTime);
 
-            /* Apply the new rotor position and velocity to the motors (before gear ratio) */
+            /*
+             * Apply the new rotor position and velocity to the motors (before gear ratio)
+             */
             motor_id_20Sim.setRawRotorPosition(
-                Radians.of(elevatorSim_motor_id_20.getPositionMeters() / kDrumRadius.in(Meters) * kGearRatio)
-            );
+                    Radians.of(elevatorSim_motor_id_20.getPositionMeters() / kDrumRadius.in(Meters) * kGearRatio));
             motor_id_20Sim.setRotorVelocity(
-                RadiansPerSecond.of(elevatorSim_motor_id_20.getVelocityMetersPerSecond() / kDrumRadius.in(Meters) * kGearRatio)
-            );
+                    RadiansPerSecond.of(elevatorSim_motor_id_20.getVelocityMetersPerSecond() / kDrumRadius.in(Meters)
+                            * kGearRatio));
         });
         simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public void setDoor(boolean open) {
+        if (open)
+            door.set(1);
+        else
+            door.set(0);
+        doorStatus = open;
+
+    }
+
+    public void setDeploy(boolean out) {
+        if (out)
+            deploy.set(1);
+        else
+            deploy.set(0);
+        deployStatus = out;
+    }
+
+    public boolean doorStatus() {
+        return doorStatus;
+    }
+
+    public boolean deployStatus() {
+        return deployStatus;
     }
 }

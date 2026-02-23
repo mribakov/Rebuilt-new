@@ -3,13 +3,13 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Elevator;
 
 public class DeployClimber extends Command {
-  private Climber climb;
+  private Elevator climb;
   private boolean out;
 
-  public DeployClimber(Climber climber, boolean out) {
+  public DeployClimber(Elevator climber, boolean out) {
     climb = climber;
     this.out = out;
     addRequirements(climb);

@@ -42,7 +42,7 @@ import frc.robot.subsystems.Intake;
 public class RobotContainer {
 
     // subsystems
-    private Climber climber;
+    private Elevator climber;
     private CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private Intake intake;
     private Trigger trigger;
@@ -72,7 +72,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         field = new Field2d();
-        climber = new Climber();
+        climber = new Elevator();
         intake = new Intake();
         trigger = new Trigger();
         turret = new Turret();
@@ -133,8 +133,14 @@ public class RobotContainer {
         //configureDrivetrain();
 
         // actual buttons for systems testing
-        joystick.leftTrigger().onTrue(new ClimbDown(climber));
-        joystick.rightTrigger().onTrue(new ClimbUp(climber));
+        joystick.leftTrigger().onTrue(new SequentialCommandGroup(
+            new ClimbDown(climber),
+            climber.holdPosition()
+        ));
+        joystick.rightTrigger().onTrue(new SequentialCommandGroup(
+            new ClimbUp(climber),
+            climber.holdPosition()
+        ));
         
         joystick.y().onTrue(new DeployIntake(intake));
         joystick.x().onTrue(new RetractIntake(intake));

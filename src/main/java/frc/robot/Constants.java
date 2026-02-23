@@ -52,11 +52,7 @@ public class Constants {
     }
 
     public class Climber {
-        public static final double homePosition = 0;
-        public static final double lvl1Position = 0;
-        public static final double lvl2Position = 0;
-        public static final double lvl3Position = 0;
-        public static final double climbThreshold = 0;
+        public static final double threshold = 0.15;
     }
 
     public class TriggerPositions {
