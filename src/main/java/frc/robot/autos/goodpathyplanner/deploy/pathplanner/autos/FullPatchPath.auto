@@ -7,25 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Nudge1"
+            "pathName": "PatchPath1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Nudge2"
+            "pathName": "PatchPath2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Nudge3"
+            "pathName": "PatchPath3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PatchPath4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NomPatchClimb"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "BottomStart",
+  "folder": "TopStarting",
   "choreoAuto": false
 }
