@@ -12,14 +12,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-  private TalonFX motorLeft;
-  private TalonFX motorRight;
+  private TalonFX feedMotor;
   private TalonFX deployMotor;
   private final double gearRatio;
 
   public Intake() {
-    motorLeft = new TalonFX(Constants.CAN_IDS.intakeMotorLeft);
-    motorRight = new TalonFX(Constants.CAN_IDS.intakeMotorRight);
+    feedMotor = new TalonFX(Constants.CAN_IDS.feedIntakeMotor);
     deployMotor = new TalonFX(Constants.CAN_IDS.deployMotor);
 
     Slot0Configs slot0Configs = new Slot0Configs();
@@ -44,17 +42,14 @@ public class Intake extends SubsystemBase {
   }
 
   public void intake() {
-    motorLeft.set(Constants.Intake.intakeSpeed);
-    motorRight.set(Constants.Intake.intakeSpeed);
+    feedMotor.set(Constants.Intake.intakeSpeed);
   }
 
   public void outtake() {
-    motorLeft.set(-Constants.Intake.intakeSpeed);
-    motorRight.set(-Constants.Intake.intakeSpeed);
+    feedMotor.set(-Constants.Intake.intakeSpeed);
   }
 
   public void stopWheels() {
-    motorLeft.set(0);
-    motorRight.set(0);
+    feedMotor.set(0);
   }
 }

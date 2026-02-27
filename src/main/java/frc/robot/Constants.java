@@ -9,10 +9,10 @@ package frc.robot;
 public class Constants {
 
     public class CAN_IDS {
-        public static final int wristMotor = 20;
-        public static final int wristEncoder = 21;
-        public static final int intakeMotorLeft = 22;
-        public static final int intakeMotorRight = 23;
+        public static final int pigeon = 20;
+        public static final int fuelTankMotor = 21;
+        public static final int feedIntakeMotor = 22;
+        public static final int kickUpMotor = 23;
         public static final int deployMotor = 24;
         public static final int turretMotorRight = 25;
         public static final int turretMotorLeft = 26;
@@ -20,8 +20,9 @@ public class Constants {
         public static final int triggerMotor = 28;
         public static final int tankMotorLeft = 29;
         public static final int tankMotorRight = 30;
-        public static final int climberMotorLeft = 31;
-        public static final int climberMotorRight = 32;
+        public static final int climberMotor = 31;
+        public static final int deployEncoder = 32;
+        public static final int climberEncoder = 33;
     }
     
     public class Channels {
