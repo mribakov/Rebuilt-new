@@ -47,9 +47,9 @@ public class Constants {
     }
 
     public class Intake {
-        public static final double deployPosition = 90; // angle in degrees
-        public static final double homePosition = 0;
-        public static final double intakeSpeed = 0;
+        public static final double deployPosition = 25; // angle in degrees
+        public static final double homePosition = 1;
+        public static final double intakeSpeed = 1.0;
     }
 
     public class Climber {

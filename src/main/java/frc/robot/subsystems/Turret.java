@@ -27,9 +27,9 @@ public class Turret extends SubsystemBase {
   private final double gearRatio;
 
   public Turret() {
-    motorLeft = new TalonFX(Constants.CAN_IDS.turretMotorLeft);
-    motorRight = new TalonFX(Constants.CAN_IDS.turretMotorRight);
-    motorRotator = new TalonFX(Constants.CAN_IDS.turretMotorRotator);
+    motorLeft = new TalonFX(Constants.CAN_IDS.turretMotorLeft, "FRC 1599B");
+    motorRight = new TalonFX(Constants.CAN_IDS.turretMotorRight, "FRC 1599B");
+    motorRotator = new TalonFX(Constants.CAN_IDS.turretMotorRotator, "FRC 1599B");
 
     motorHoodLeft = new HiTecServo(Constants.Channels.motorHoodLeft);
     motorHoodRight = new HiTecServo(Constants.Channels.motorHoodRight);
@@ -115,5 +115,6 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Motor Right Speed", motorRight.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Turret Motor Left Speed", motorLeft.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Turret Motor Rotator Speed", motorRotator.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Turret Position", motorRotator.getPosition().getValueAsDouble());
   }
 }

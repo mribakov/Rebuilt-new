@@ -755,6 +755,7 @@ public class LimelightHelpers {
      * @return Array of RawFiducial objects containing detection details
      */
     public static RawFiducial[] getRawFiducials(String limelightName) {
+        LimelightHelpers.setCameraPose_RobotSpace(limelightName, 0, 0, 0, 0, 0, 0);
         var entry = LimelightHelpers.getLimelightNTTableEntry(limelightName, "rawfiducials");
         var rawFiducialArray = entry.getDoubleArray(new double[0]);
         int valsPerEntry = 7;
