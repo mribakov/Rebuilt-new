@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.38019277108915783,
+        "y": 4.974783132530121
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.4129759036102308,
+        "y": 4.286337349397476
+      },
+      "isLocked": false,
+      "linkedName": "Last hourrah climb"
+    },
+    {
+      "anchor": {
+        "x": 0.38019277108915783,
+        "y": 0.6096691491621165
+      },
+      "prevControl": {
+        "x": 0.36926506023673666,
+        "y": 1.6368739684392257
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Last Hoorah Human"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "shoot",
+      "waypointRelativePos": 0.5429280397022359,
+      "endWaypointRelativePos": 0.8605459057071954,
+      "command": null
+    },
+    {
+      "name": "stop",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "MiddleStarting",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

@@ -1,0 +1,75 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.412975903614458,
+        "y": 0.5490602409638552
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.83357831324969,
+        "y": 1.3249277108399653
+      },
+      "isLocked": false,
+      "linkedName": "Push Human"
+    },
+    {
+      "anchor": {
+        "x": 2.3362530120481932,
+        "y": 3.9912891566265065
+      },
+      "prevControl": {
+        "x": 2.265617681046927,
+        "y": 3.546702073265594
+      },
+      "nextControl": {
+        "x": 2.522024096385542,
+        "y": 5.16055421686747
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.412975903614458,
+        "y": 5.073132530117073
+      },
+      "prevControl": {
+        "x": 0.9047228915629426,
+        "y": 4.996638554213458
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Push Patch"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0506224066390035,
+      "rotationDegrees": -87.83452350724158
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.58166305759381
+  },
+  "reversed": false,
+  "folder": "BottomStarting",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

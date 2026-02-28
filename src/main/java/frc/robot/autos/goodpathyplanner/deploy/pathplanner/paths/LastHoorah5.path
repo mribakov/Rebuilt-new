@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.38019277108915783,
+        "y": 0.6096691491621165
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.942855421686747,
+        "y": 0.691120481927711
+      },
+      "isLocked": false,
+      "linkedName": "Last Hoorah Human"
+    },
+    {
+      "anchor": {
+        "x": 1.7352289156626508,
+        "y": 3.805518072289157
+      },
+      "prevControl": {
+        "x": 1.6696626506024095,
+        "y": 0.2758674698795174
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "shoot",
+      "waypointRelativePos": 0.636228287841187,
+      "endWaypointRelativePos": 0.9836228287841048,
+      "command": null
+    },
+    {
+      "name": "AutoAlignClimb",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "MiddleStarting",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

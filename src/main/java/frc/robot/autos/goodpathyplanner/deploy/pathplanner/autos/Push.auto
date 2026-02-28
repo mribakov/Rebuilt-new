@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Push1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Push2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Push3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Push4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Push5"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "BottomStart",
+  "choreoAuto": false
+}
