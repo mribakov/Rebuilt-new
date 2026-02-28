@@ -23,6 +23,7 @@ public class ManualTurret extends Command {
   public void execute()
   {
     turret.rotate(speed.get());
+    System.out.println(speed.get());
   }
 
   @Override

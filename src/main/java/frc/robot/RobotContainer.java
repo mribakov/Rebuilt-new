@@ -148,7 +148,7 @@ public class RobotContainer {
         joystick.b().whileTrue(new RunOuttake(intake));
 
         joystick.povDown().onTrue(new SpinToSpeed(turret, 0));
-        joystick.povRight().onTrue(new SpinToSpeed(turret, 800));
+        joystick.povRight().onTrue(new SpinToSpeed(turret, 1));
         joystick.povUp().whileTrue(new Shoot(turret, trigger));
 
         joystick.rightBumper().onTrue(new LineUpClimb(drivetrain));

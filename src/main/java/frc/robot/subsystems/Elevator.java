@@ -166,7 +166,7 @@ public class Elevator extends SubsystemBase {
         cancoder = new CANcoder(Constants.CAN_IDS.climberEncoder);
 
         motor_id_20Configs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        motor_id_20Configs.Feedback.FeedbackRemoteSensorID = climberEncoder.getDeviceID();
+        motor_id_20Configs.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
         for (int i = 0; i < kNumConfigAttempts; ++i) {
             var status = motor_id_20.getConfigurator().apply(motor_id_20Configs);
             if (status.isOK())

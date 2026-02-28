@@ -21,9 +21,8 @@ public class Constants {
         public static final int tankMotorLeft = 29;
         public static final int tankMotorRight = 30;
         public static final int climberMotor = 31;
-        public static final int deployEncoder = 32;
         public static final int climberEncoder = 33;
-        public static final int turretEncoder = -1;
+        public static final int turretEncoder = 32;
     }
     
     public class Channels {
