@@ -13,9 +13,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -30,7 +28,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -38,15 +35,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
-import frc.robot.util.LinearServo;
 
 public class Elevator extends SubsystemBase {
     /** Position setpoints for the elevator. */
     public enum Setpoint {
-        Ground(Rotations.of(0)),
+        Starting(Rotations.of(0)),
         Middle(Rotations.of(1)),
-        Top(Rotations.of(3));
+        Top(Rotations.of(2.655));
 
         /** The position target of the setpoint in angular units. */
         public final Angle target;
@@ -57,48 +52,46 @@ public class Elevator extends SubsystemBase {
             this.target = target;
             this.targetDist = kDrumRadius.times(target.in(Radians));
         }
-
         private Setpoint(Distance target) {
             this.target = Radians.of(target.div(kDrumRadius).magnitude());
             this.targetDist = target;
         }
     }
-    
-    private CANcoder climberEncoder;
-   
+
     private static final int kNumConfigAttempts = 2;
 
-    private static final double kGearRatio = 40.5;
-    private static final Distance kDrumRadius = Meters.of(0.030733999999999997);
+    private static final double kGearRatio = 45;
+    private static final Distance kDrumRadius = Meters.of(3.0734);
     private static final Distance kMaxHeight = Meters.of(0);
 
     /* leader and follower motors */
-    private final CANBus kCANBus = new CANBus("FRC 1599B");
-    private final TalonFX motor_id_20 = new TalonFX(20, kCANBus);
+    private final CANBus kCANBus = new CANBus("1599-B");
+    private final TalonFX motor_id_31 = new TalonFX(31, kCANBus);
 
     /* device status signals */
-    private final StatusSignal<Angle> motor_id_20Position = motor_id_20.getPosition(false);
-    private final StatusSignal<AngularVelocity> motor_id_20Velocity = motor_id_20.getVelocity(false);
-    private final StatusSignal<Current> motor_id_20TorqueCurrent = motor_id_20.getTorqueCurrent(false);
+    private final StatusSignal<Angle> motor_id_31Position = motor_id_31.getPosition(false);
+    private final StatusSignal<AngularVelocity> motor_id_31Velocity = motor_id_31.getVelocity(false);
+    private final StatusSignal<Current> motor_id_31TorqueCurrent = motor_id_31.getTorqueCurrent(false);
 
     /* controls used by the leader motors */
     private final MotionMagicVoltage setpointRequest = new MotionMagicVoltage(0);
     private final DutyCycleOut manualRequest = new DutyCycleOut(0);
     private final DutyCycleOut calibrationRequest = new DutyCycleOut(-0.1)
-            .withIgnoreHardwareLimits(true)
-            .withIgnoreSoftwareLimits(true);
+        .withIgnoreHardwareLimits(true)
+        .withIgnoreSoftwareLimits(true);
 
     /** Trigger to detect when the elevator drives into a hard stop. */
     public final Trigger isHardStop = new Trigger(() -> {
-        return motor_id_20Velocity.getValue().abs(RotationsPerSecond) < 1 &&
-                motor_id_20TorqueCurrent.getValue().abs(Amps) > 10;
+        return motor_id_31Velocity.getValue().abs(RotationsPerSecond) < 1 &&
+            motor_id_31TorqueCurrent.getValue().abs(Amps) > 10;
     }).debounce(0.1);
 
     /* simulation */
-    private final ElevatorSim elevatorSim_motor_id_20 = new ElevatorSim(
-            DCMotor.getKrakenX60Foc(1),
-            kGearRatio, 5, kDrumRadius.in(Meters),
-            0.0, kMaxHeight.in(Meters), true, 0.0);
+    private final ElevatorSim elevatorSim_motor_id_31 = new ElevatorSim(
+        DCMotor.getKrakenX60Foc(1),
+        kGearRatio, 5, kDrumRadius.in(Meters),
+        0.0, kMaxHeight.in(Meters), true, 0.0
+    );
 
     private static final double kSimLoopPeriod = 0.002; // 2 ms
     private Notifier simNotifier = null;
@@ -106,8 +99,8 @@ public class Elevator extends SubsystemBase {
 
     /* Mechanism2d visualization of the elevator */
     private final Mechanism2d mech2d = new Mechanism2d(1, kMaxHeight.in(Meters));
-    private final MechanismLigament2d motor_id_20Mech2d = mech2d.getRoot("motor_id_20 Root", 0.500, 0)
-            .append(new MechanismLigament2d("motor_id_20", elevatorSim_motor_id_20.getPositionMeters(), 90));
+    private final MechanismLigament2d motor_id_31Mech2d = mech2d.getRoot("motor_id_31 Root", 0.500, 0)
+        .append(new MechanismLigament2d("motor_id_31", elevatorSim_motor_id_31.getPositionMeters(), 90));
 
     /** Configs common across all motors. */
     private static final TalonFXConfiguration motorInitialConfigs = new TalonFXConfiguration();
@@ -115,58 +108,58 @@ public class Elevator extends SubsystemBase {
     /** Configs common across just the leader motors. */
     private static final TalonFXConfiguration leaderInitialConfigs = motorInitialConfigs.clone();
 
-    /** Configs for {@link #motor_id_20}. */
-    private final TalonFXConfiguration motor_id_20Configs = leaderInitialConfigs.clone()
-            .withMotorOutput(
-                    leaderInitialConfigs.MotorOutput.clone()
-                            .withNeutralMode(NeutralModeValue.Coast))
-            .withCurrentLimits(
-                    leaderInitialConfigs.CurrentLimits.clone()
-                            .withStatorCurrentLimit(Amps.of(120))
-                            .withStatorCurrentLimitEnable(true))
-            .withSlot0(
-                    leaderInitialConfigs.Slot0.clone()
-                            .withKP(67.5)
-                            .withKI(0)
-                            .withKD(0)
-                            .withKS(0.2)
-                            .withKV(2.025)
-                            .withKA(0)
-                            .withKG(0)
-                            .withGravityType(GravityTypeValue.Elevator_Static))
-            .withFeedback(
-                    leaderInitialConfigs.Feedback.clone()
-                            .withSensorToMechanismRatio(16.875))
-            .withHardwareLimitSwitch(
-                    leaderInitialConfigs.HardwareLimitSwitch.clone()
-                            .withForwardLimitEnable(true)
-                            .withForwardLimitAutosetPositionEnable(false)
-                            .withForwardLimitRemoteSensorID(0)
-                            .withForwardLimitSource(ForwardLimitSourceValue.LimitSwitchPin)
-                            .withForwardLimitType(ForwardLimitTypeValue.NormallyOpen)
-                            .withReverseLimitAutosetPositionEnable(false)
-                            .withReverseLimitEnable(true)
-                            .withReverseLimitRemoteSensorID(0)
-                            .withReverseLimitSource(ReverseLimitSourceValue.LimitSwitchPin)
-                            .withReverseLimitType(ReverseLimitTypeValue.NormallyOpen))
-            .withMotionMagic(
-                    leaderInitialConfigs.MotionMagic.clone()
-                            .withMotionMagicCruiseVelocity(RotationsPerSecond.of(4.7407407407407405))
-                            .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(23.703703703703702)));
-
-        private CANcoder cancoder;
+    /** Configs for {@link #motor_id_31}. */
+    private final TalonFXConfiguration motor_id_31Configs = leaderInitialConfigs.clone()
+        .withMotorOutput(
+            leaderInitialConfigs.MotorOutput.clone()
+                .withNeutralMode(NeutralModeValue.Coast)
+        )
+        .withCurrentLimits(
+            leaderInitialConfigs.CurrentLimits.clone()
+                .withStatorCurrentLimit(Amps.of(120))
+                .withStatorCurrentLimitEnable(true)
+        )
+        .withSlot0(
+            leaderInitialConfigs.Slot0.clone()
+                .withKP(180)
+                .withKI(0)
+                .withKD(0)
+                .withKS(0.2)
+                .withKV(5.3999999999999995)
+                .withKA(0)
+                .withKG(0)
+                .withGravityType(GravityTypeValue.Elevator_Static)
+        )
+        .withFeedback(
+            leaderInitialConfigs.Feedback.clone()
+                .withSensorToMechanismRatio(45)
+        )
+        .withHardwareLimitSwitch(
+            leaderInitialConfigs.HardwareLimitSwitch.clone()
+                .withForwardLimitEnable(true)
+                .withForwardLimitAutosetPositionEnable(false)
+                .withForwardLimitRemoteSensorID(0)
+                .withForwardLimitSource(ForwardLimitSourceValue.LimitSwitchPin)
+                .withForwardLimitType(ForwardLimitTypeValue.NormallyOpen)
+                .withReverseLimitAutosetPositionEnable(false)
+                .withReverseLimitEnable(true)
+                .withReverseLimitRemoteSensorID(0)
+                .withReverseLimitSource(ReverseLimitSourceValue.LimitSwitchPin)
+                .withReverseLimitType(ReverseLimitTypeValue.NormallyOpen)
+        )
+        .withMotionMagic(
+            leaderInitialConfigs.MotionMagic.clone()
+                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(1.7777777777777777))
+                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(8.88888888888889))
+        );
 
     public Elevator() {
-
-        cancoder = new CANcoder(Constants.CAN_IDS.climberEncoder);
-
-        motor_id_20Configs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        motor_id_20Configs.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
         for (int i = 0; i < kNumConfigAttempts; ++i) {
-            var status = motor_id_20.getConfigurator().apply(motor_id_20Configs);
-            if (status.isOK())
+            var status = motor_id_31.getConfigurator().apply(motor_id_31Configs);
+            if (status.isOK()) 
                 break;
         }
+
 
         /* set the default command to neutral output */
         setDefaultCommand(manualDrive(() -> 0.0));
@@ -178,33 +171,29 @@ public class Elevator extends SubsystemBase {
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
-    
-        climberEncoder = new CANcoder(Constants.CAN_IDS.climberEncoder);
-        //motor_id_20.setPosition(climberEncoder.getAbsolutePosition().getValue());
-
-
     }
+
+  
 
     /**
      * @return The Position of the elevator
      */
     public Angle getPosition() {
-        return motor_id_20Position.getValue();
+        return motor_id_31Position.getValue();
     }
 
     /**
      * @return The Velocity of the elevator
      */
     public AngularVelocity getVelocity() {
-        return motor_id_20Velocity.getValue();
+        return motor_id_31Velocity.getValue();
     }
 
     /**
      * @return The TorqueCurrent of the elevator
      */
     public Current getTorqueCurrent() {
-        return motor_id_20TorqueCurrent.getValue();
+        return motor_id_31TorqueCurrent.getValue();
     }
 
     /**
@@ -213,8 +202,10 @@ public class Elevator extends SubsystemBase {
      * @return Command to run
      */
     public Command holdPosition() {
-        return runOnce(() -> setpointRequest.withPosition(motor_id_20Position.getValue())).andThen(run(() -> {
-            motor_id_20.setControl(setpointRequest);
+        return runOnce(() ->
+            setpointRequest.withPosition(motor_id_31Position.getValue())
+        ).andThen(run(() -> {
+            motor_id_31.setControl(setpointRequest);
         }));
     }
 
@@ -227,7 +218,7 @@ public class Elevator extends SubsystemBase {
     public Command goToSetpoint(Supplier<Setpoint> setpoint) {
         return run(() -> {
             setpointRequest.withPosition(setpoint.get().target);
-            motor_id_20.setControl(setpointRequest);
+            motor_id_31.setControl(setpointRequest);
         });
     }
 
@@ -240,7 +231,7 @@ public class Elevator extends SubsystemBase {
     public Command manualDrive(DoubleSupplier manualOutput) {
         return run(() -> {
             manualRequest.withOutput(manualOutput.getAsDouble());
-            motor_id_20.setControl(manualRequest);
+            motor_id_31.setControl(manualRequest);
         });
     }
 
@@ -253,31 +244,34 @@ public class Elevator extends SubsystemBase {
      */
     public Command calibrateZero() {
         return run(() -> {
-            motor_id_20.setControl(calibrationRequest);
+            motor_id_31.setControl(calibrationRequest);
         })
-                .until(isHardStop)
-                .andThen(
-                        manualDrive(() -> 0.0).withTimeout(0.25)
-                                .finallyDo(() -> {
-                                    motor_id_20.setPosition(Rotations.of(0));
-                                }));
+        .until(isHardStop)
+        .andThen(
+            manualDrive(() -> 0.0).withTimeout(0.25)
+                .finallyDo(() -> {
+                    motor_id_31.setPosition(Rotations.of(0));
+                })
+        );
     }
 
     @Override
     public void periodic() {
         /* refresh all status signals */
         BaseStatusSignal.refreshAll(
-                motor_id_20Position,
-                motor_id_20Velocity,
-                motor_id_20TorqueCurrent);
+            motor_id_31Position,
+            motor_id_31Velocity,
+            motor_id_31TorqueCurrent
+        );
 
-        motor_id_20Mech2d.setLength(
-                motor_id_20Position.getValueAsDouble() * kDrumRadius.in(Meters) * 2 * Math.PI);
+        motor_id_31Mech2d.setLength(
+            motor_id_31Position.getValueAsDouble() * kDrumRadius.in(Meters) * 2 * Math.PI
+        );
     }
 
     private void startSimThread() {
-        motor_id_20.getSimState().Orientation = ChassisReference.CounterClockwise_Positive;
-        motor_id_20.getSimState().setMotorType(TalonFXSimState.MotorType.KrakenX60);
+        motor_id_31.getSimState().Orientation = ChassisReference.CounterClockwise_Positive;
+        motor_id_31.getSimState().setMotorType(TalonFXSimState.MotorType.KrakenX60);
 
         lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -288,27 +282,23 @@ public class Elevator extends SubsystemBase {
             final double deltaTime = currentTime - lastSimTime;
             lastSimTime = currentTime;
 
-            final var motor_id_20Sim = motor_id_20.getSimState();
+            final var motor_id_31Sim = motor_id_31.getSimState();
 
             /* First set the supply voltage of all the devices */
-            motor_id_20Sim.setSupplyVoltage(RobotController.getBatteryVoltage());
+            motor_id_31Sim.setSupplyVoltage(RobotController.getBatteryVoltage());
 
             /* Then calculate the new position and velocity of the simulated elevator */
-            elevatorSim_motor_id_20.setInputVoltage(motor_id_20Sim.getMotorVoltage());
-            elevatorSim_motor_id_20.update(deltaTime);
+            elevatorSim_motor_id_31.setInputVoltage(motor_id_31Sim.getMotorVoltage());
+            elevatorSim_motor_id_31.update(deltaTime);
 
-            /*
-             * Apply the new rotor position and velocity to the motors (before gear ratio)
-             */
-            motor_id_20Sim.setRawRotorPosition(
-                    Radians.of(elevatorSim_motor_id_20.getPositionMeters() / kDrumRadius.in(Meters) * kGearRatio));
-            motor_id_20Sim.setRotorVelocity(
-                    RadiansPerSecond.of(elevatorSim_motor_id_20.getVelocityMetersPerSecond() / kDrumRadius.in(Meters)
-                            * kGearRatio));
+            /* Apply the new rotor position and velocity to the motors (before gear ratio) */
+            motor_id_31Sim.setRawRotorPosition(
+                Radians.of(elevatorSim_motor_id_31.getPositionMeters() / kDrumRadius.in(Meters) * kGearRatio)
+            );
+            motor_id_31Sim.setRotorVelocity(
+                RadiansPerSecond.of(elevatorSim_motor_id_31.getVelocityMetersPerSecond() / kDrumRadius.in(Meters) * kGearRatio)
+            );
         });
         simNotifier.startPeriodic(kSimLoopPeriod);
     }
-
-    
-   
 }
