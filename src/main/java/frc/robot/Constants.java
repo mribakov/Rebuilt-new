@@ -21,14 +21,15 @@ public class Constants {
         public static final int tankMotorLeft = 29;
         public static final int tankMotorRight = 30;
         public static final int climberMotor = 31;
-        public static final int climberEncoder = 33;
+        public static final int climberEncoder = 330;
         public static final int turretEncoder = 32;
+        public static final int deployEncoder = 33;
     }
     
     public class Channels {
         public static final int motorHoodLeft = 0;
         public static final int motorHoodRight = 1;
-        public static final int deployEncoder = 7;
+        
     }
 
     public class Wrist {
@@ -49,6 +50,9 @@ public class Constants {
         public static final double deployPosition = 25; // angle in degrees
         public static final double homePosition = 1;
         public static final double intakeSpeed = 1.0;
+        public static final double intakeEncoderOffset = 0;
+        public static final double deployLowThreshold = .24;
+        public static final double deployHighThreshold = -.085;
     }
 
     public class Climber {

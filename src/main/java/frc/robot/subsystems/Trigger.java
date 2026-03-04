@@ -21,12 +21,12 @@ public class Trigger extends SubsystemBase {
 
   public Trigger() {
 
-    //motor = new TalonFX(Constants.CAN_IDS.triggerMotor, "1599-B");
+    motor = new TalonFX(Constants.CAN_IDS.triggerMotor, "FRC 1599B");
     
   }
 
   public void shoot() {
-    motor.set(1.0);
+    motor.set(1);
   }
 
   public void stop() {

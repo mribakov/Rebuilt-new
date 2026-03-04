@@ -148,11 +148,10 @@ public class RobotContainer {
         joystick.b().whileTrue(new RunOuttake(intake));
 
         joystick.povDown().onTrue(new SpinToSpeed(turret, 0));
-        joystick.povRight().onTrue(new SpinToSpeed(turret, 2));
+        joystick.povRight().onTrue(new SpinToSpeed(turret, 1));
         joystick.povUp().whileTrue(new Shoot(turret, trigger));
 
         joystick.rightBumper().onTrue(new LineUpClimb(drivetrain));
-        joystick.start().onTrue(new DeployClimber(climber, !climber.deployStatus()));
 
 
         turret.setDefaultCommand(new ManualTurret(turret, joystick::getLeftX));

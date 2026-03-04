@@ -18,10 +18,9 @@ public class Shoot extends Command {
 
   @Override
   public void execute() {
-    if (turret.isAtSpeed())
+   
       trigger.shoot();
-    else
-      trigger.stop();
+    
   }
 
   @Override

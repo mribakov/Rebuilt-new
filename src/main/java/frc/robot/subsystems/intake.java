@@ -7,9 +7,11 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -17,13 +19,13 @@ import frc.robot.Constants;
 public class Intake extends SubsystemBase {
   private TalonFX feedMotor;
   private TalonFX deployMotor;
+  private CANcoder deployEncoder;
   private final double gearRatio;
-  private DutyCycleEncoder pivotEncoder;
 
   public Intake() {
     feedMotor = new TalonFX(Constants.CAN_IDS.feedIntakeMotor, "FRC 1599B");
     deployMotor = new TalonFX(Constants.CAN_IDS.deployMotor, "FRC 1599B");
-    deployEncoder = new DutyCycleEncoder(Constants.Channels.deployEncoder);
+    deployEncoder = new CANcoder(33, "FRC 1599B");
 
 
     Slot0Configs slot0Configs = new Slot0Configs();
@@ -38,13 +40,20 @@ public class Intake extends SubsystemBase {
 
   public void deploy() {
     // position unit is rotations of the motor
-    final PositionVoltage m_request = new PositionVoltage(Constants.Intake.deployPosition).withSlot(0);
-    deployMotor.setControl(m_request);
+    
+
+    if (getAngleEncoder() <= Constants.Intake.deployLowThreshold) {
+      deployMotor.set(0);
+    } else if (getAngleEncoder() >= Constants.Intake.deployHighThreshold) {
+      deployMotor.set(0);
+    } else {
+    deployMotor.setPosition(.24);
+    }
   }
 
   public void retract() {
     // no math needed because it is zero
-    final PositionVoltage m_request = new PositionVoltage(Constants.Intake.homePosition).withSlot(0);
+    final PositionVoltage m_request = new PositionVoltage(.23);
     deployMotor.setControl(m_request);
   }
 
@@ -54,7 +63,7 @@ public class Intake extends SubsystemBase {
   }
 
   public double getAngleEncoder() {
-    return (pivotEncoder.get() - Constants.) * 360;
+    return (deployEncoder.getAbsolutePosition().getValueAsDouble());
   }
 
   public void outtake() {
@@ -67,7 +76,13 @@ public class Intake extends SubsystemBase {
     //feedMotor.set(0);
   }
 
+  
+  @Override
   public void periodic() {
     SmartDashboard.putNumber("deployMotor", deployMotor.getPosition().getValueAsDouble());
+    //SmartDashboard.putNumber("Deploy Encoder get", deployEncoder.get());
+    SmartDashboard.putNumber("Deploy Encoder Degrees", deployEncoder.getPosition().getValueAsDouble());
+
+
   }
 }

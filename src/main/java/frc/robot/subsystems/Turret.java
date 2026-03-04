@@ -88,7 +88,7 @@ public class Turret extends SubsystemBase {
     targetVelocity = speed; // gear ratio is 1:1 so no math needed
     final VelocityVoltage m_request = new VelocityVoltage(targetVelocity).withSlot(0);
     motorLeft.setControl(m_request);
-    motorRight.setControl(m_request);
+    //motorRight.setControl(m_request);
   }
 
   public boolean isAtSpeed()
@@ -127,5 +127,6 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Motor Rotator Speed", motorRotator.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Turret Position", motorRotator.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("cancoder", turretEncoder.getPosition().getValueAsDouble());
+    //SmartDashboard.putNumber("deploy encoder", new CANcoder(33, "FRC 1599B").getPosition().getValueAsDouble());
   }
 }

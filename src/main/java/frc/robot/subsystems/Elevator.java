@@ -39,7 +39,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.util.ActuonixServo;
 import frc.robot.util.LinearServo;
 
 public class Elevator extends SubsystemBase {
@@ -66,11 +65,7 @@ public class Elevator extends SubsystemBase {
     }
     
     private CANcoder climberEncoder;
-    private Servo door;
-    private LinearServo deploy;
-    private boolean doorStatus; // true = open
-    private boolean deployStatus; // true = out
-
+   
     private static final int kNumConfigAttempts = 2;
 
     private static final double kGearRatio = 40.5;
@@ -187,10 +182,6 @@ public class Elevator extends SubsystemBase {
     
         climberEncoder = new CANcoder(Constants.CAN_IDS.climberEncoder);
         //motor_id_20.setPosition(climberEncoder.getAbsolutePosition().getValue());
-        doorStatus = false;
-        deployStatus = false;
-        setDeploy(false);
-        setDoor(false);
 
 
     }
@@ -318,28 +309,6 @@ public class Elevator extends SubsystemBase {
         simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    public void setDoor(boolean open) {
-        if (open)
-            door.set(0);
-        else
-            door.set(0.333333333333333333333333333);
-        doorStatus = open;
-
-    }
-
-    public void setDeploy(boolean out) {
-        if (out)
-            deploy.set(1);
-        else
-            deploy.set(0);
-        deployStatus = out;
-    }
-
-    public boolean doorStatus() {
-        return doorStatus;
-    }
-
-    public boolean deployStatus() {
-        return deployStatus;
-    }
+    
+   
 }
