@@ -3,7 +3,11 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.units.Units.*;
 
+import frc.robot.generated.TunerConstants;
 
 /** Add your docs here. */
 public class Constants {
@@ -21,7 +25,7 @@ public class Constants {
         public static final int tankMotorLeft = 29;
         public static final int tankMotorRight = 30;
         public static final int climberMotor = 31;
-        public static final int climberEncoder = 330;
+        public static final int climberEncoder = 34;
         public static final int turretEncoder = 32;
         public static final int deployEncoder = 33;
     }
@@ -82,5 +86,15 @@ public class Constants {
         
     }
   
+    
+    public class Drive {
+        public static boolean SpeedToggle = true; //true = fast, false = slow
+        public static double Speed = 1;
+        public static double maxSpeed = 1;
+        public static double minSpeed = 3.5; // the value is what the speed is being divided by
+        
+        public static double MaxSpeed = (TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)); // kSpeedAt12Volts desired top speed 6 wads slow
+        public static double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 1/2 of a rotation per second max
+    }
 }
 

@@ -66,7 +66,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     // IO devices
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController Player1 = new CommandXboxController(0);
 
     public RobotContainer() {
         field = new Field2d();
@@ -93,11 +93,11 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+                drivetrain.applyRequest(() -> drive.withVelocityX(-Player1.getLeftY() * MaxSpeed) // Drive forward with
                                                                                                    // negative Y
                                                                                                    // (forward)
-                        .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with
+                        .withVelocityY(-Player1.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-Player1.getRightX() * MaxAngularRate) // Drive counterclockwise with
                                                                                     // negative X (left)
         ));
 
@@ -108,53 +108,68 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
         
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        //().whileTrue(drivetrain.applyRequest(() -> brake));
+        Player1.b().whileTrue(drivetrain.applyRequest(() ->
+            point.withModuleDirection(new Rotation2d(-Player1.getLeftY(), -Player1.getLeftX()))
         ));
         
-        joystick.setRumble(RumbleType.kBothRumble, 1);
+        Player1.setRumble(RumbleType.kBothRumble, 1);
 
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
+       
         // reset the field-centric heading on left bumper press
         //joystick.leftBumper().onTrue(new runIntake(intake, 0.5));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
+
+
     private void configureBindings() {
-        //configureDrivetrain();
+        configureDrivetrain();
+ drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() -> 
+                drive.withVelocityX(-(Player1.getLeftY()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive forward with negative Y (forward)
+                    .withVelocityY(-(Player1.getLeftX()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive left with negative X (left)
+                    .withRotationalRate(-Player1.getRightX() * Constants.Drive.MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
+
+        drivetrain.seedFieldCentric();
+        Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // actual buttons for systems testing
-        joystick.leftTrigger().onTrue(new SequentialCommandGroup(
+        Player1.leftTrigger().onTrue(new SequentialCommandGroup(
             new ClimbDown(climber),
             climber.holdPosition()
         ));
-        joystick.rightTrigger().onTrue(new SequentialCommandGroup(
+        
+        Player1.rightTrigger().onTrue(new SequentialCommandGroup(
             new ClimbUp(climber),
             climber.holdPosition()
         ));
         
-        joystick.y().onTrue(new DeployIntake(intake));
-        joystick.x().onTrue(new RetractIntake(intake));
-        joystick.a().whileTrue(new RunIntake(intake));
-        joystick.b().whileTrue(new RunOuttake(intake));
+        Player1.y().onTrue(new DeployIntake(intake));
+        Player1.x().onTrue(new RetractIntake(intake));
+        Player1.a().whileTrue(new RunIntake(intake));
+        Player1.b().whileTrue(new RunOuttake(intake));
 
-        joystick.povDown().onTrue(new SpinToSpeed(turret, 0));
-        joystick.povRight().onTrue(new SpinToSpeed(turret, 1));
-        joystick.povUp().whileTrue(new Shoot(turret, trigger));
+        Player1.back().and(Player1.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        Player1.back().and(Player1.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        Player1.start().and(Player1.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        Player1.start().and(Player1.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        joystick.rightBumper().onTrue(new LineUpClimb(drivetrain));
+        Player1.povDown().onTrue(new SpinToSpeed(turret, 0));
+        Player1.povRight().onTrue(new SpinToSpeed(turret, 1));
+        Player1.povUp().whileTrue(new Shoot(turret, trigger));
+
+        Player1.rightBumper().onTrue(new LineUpClimb(drivetrain));
 
 
-        turret.setDefaultCommand(new ManualTurret(turret, joystick::getLeftX));
+        //turret.setDefaultCommand(new ManualTurret(turret, joystick::getLeftX));
     }
 
 }
