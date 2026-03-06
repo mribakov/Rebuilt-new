@@ -152,7 +152,7 @@ public class RobotContainer {
             climber.holdPosition()
         ));
         
-        Player1.y().onTrue(new DeployIntake(intake));
+        /*Player1.y().onTrue(new DeployIntake(intake));
         Player1.x().onTrue(new RetractIntake(intake));
         Player1.a().whileTrue(new RunIntake(intake));
         Player1.b().whileTrue(new RunOuttake(intake));
@@ -161,12 +161,13 @@ public class RobotContainer {
         Player1.back().and(Player1.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         Player1.start().and(Player1.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         Player1.start().and(Player1.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
+        */
         Player1.povDown().onTrue(new SpinToSpeed(turret, 0));
         Player1.povRight().onTrue(new SpinToSpeed(turret, 1));
-        Player1.povUp().whileTrue(new Shoot(turret, trigger));
+        Player1.povUp().onTrue(new TestShooter(turret, 0));
+        Player1.povLeft().onTrue(new TestShooter(turret, 0.3));
 
-        Player1.rightBumper().onTrue(new LineUpClimb(drivetrain));
+        //Player1.rightBumper().onTrue(new LineUpClimb(drivetrain));
 
 
         //turret.setDefaultCommand(new ManualTurret(turret, joystick::getLeftX));

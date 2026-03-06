@@ -88,7 +88,7 @@ public class Turret extends SubsystemBase {
     targetVelocity = speed; // gear ratio is 1:1 so no math needed
     final VelocityVoltage m_request = new VelocityVoltage(targetVelocity).withSlot(0);
     motorLeft.setControl(m_request);
-    //motorRight.setControl(m_request);
+    motorRight.setControl(m_request);
   }
 
   public boolean isAtSpeed()
