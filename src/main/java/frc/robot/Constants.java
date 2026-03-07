@@ -16,23 +16,24 @@ public class Constants {
         public static final int pigeon = 20;
         public static final int fuelTankMotor = 21;
         public static final int feedIntakeMotor = 22;
-        public static final int kickUpMotor = 23;
+        public static final int indexMotor = 23;
         public static final int deployMotor = 24;
         public static final int turretMotorRight = 25;
         public static final int turretMotorLeft = 40;
         public static final int turretMotorRotator = 27;
-        public static final int triggerMotor = 28;
+        public static final int kickUpMotor = 28;
         public static final int tankMotorLeft = 29;
         public static final int tankMotorRight = 30;
         public static final int climberMotor = 31;
-        public static final int climberEncoder = 34;
         public static final int turretEncoder = 32;
         public static final int deployEncoder = 33;
+        public static final int climberEncoder = 34;
+
     }
     
     public class Channels {
-        public static final int motorHoodLeft = 0;
-        public static final int motorHoodRight = 1;
+        public static final int motorHoodLeft = 5;
+        //public static final int motorHoodRight = 1;
         
     }
 

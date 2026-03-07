@@ -45,6 +45,7 @@ public class RobotContainer {
     private Intake intake;
     private Trigger trigger;
     private Turret turret;
+    private Trigger index;
 
     // drivetrain
     private final Field2d field;
@@ -77,6 +78,7 @@ public class RobotContainer {
 
         // Do all other initialization
         configureBindings();
+        SmartDashboard.putNumber("velocity", 1.0);
     }
 
     /*public Command getAutonomousCommand() {
@@ -136,40 +138,22 @@ public class RobotContainer {
         );
 
         drivetrain.seedFieldCentric();
-        Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));*/
 
-        // actual buttons for systems testing
-        Player1.leftTrigger().onTrue(new SequentialCommandGroup(
-            new ClimbDown(climber),
-            climber.holdPosition()
-        ));
-        
-        Player1.rightTrigger().onTrue(new SequentialCommandGroup(
-            new ClimbUp(climber),
-            climber.holdPosition()
-        ));*/
+        //Player1.rightBumper().onTrue(new ClimbUp(climber));
+        Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
+        Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
+        //Player1.leftBumper().onTrue(new ClimbDown(climber));
         
         Player1.y().onTrue(new DeployIntake(intake));
         Player1.x().onTrue(new RetractIntake(intake));
         Player1.a().whileTrue(new RunIntake(intake));
-        Player1.b().whileTrue(new RunOuttake(intake));
-/* 
-        Player1.back().and(Player1.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        Player1.back().and(Player1.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        Player1.start().and(Player1.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        Player1.start().and(Player1.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-        */
-        Player1.povDown().onTrue(new SpinToSpeed(turret, 0));
-        Player1.povRight().onTrue(new SpinToSpeed(turret, 25));
-        Player1.povUp().onTrue(new TestShooter(turret, 0));
-        Player1.povLeft().onTrue(new TestShooter(turret, 0.3));
-        
-        //Player1.a().whileTrue(new Shoot(turret, trigger));
+        Player1.b().whileTrue(new Shoot(turret, trigger));
 
-        //Player1.rightBumper().onTrue(new LineUpClimb(drivetrain));
-
-
-        //turret.setDefaultCommand(new ManualTurret(turret, joystick::getLeftX));
+        Player1.povDown().onTrue(new StopTurretWheels(turret));
+        Player1.povRight().onTrue(new SpinToSpeed(turret, 40));
+        Player1.povUp().onTrue(new ToggleHood(turret));
+        //Player1.povLeft().onTrue(new TestShooter(turret, 0.3));
     }
 
 }

@@ -26,6 +26,7 @@ public class Turret extends SubsystemBase {
   private TalonFX motorRotator;
   private LinearServo motorHoodLeft;
   private LinearServo motorHoodRight;
+  private boolean hoodUp;
   private CANcoder turretEncoder;
   private double targetVelocity;
   private final double gearRatio;
@@ -35,8 +36,9 @@ public class Turret extends SubsystemBase {
     motorRight = new TalonFX(Constants.CAN_IDS.turretMotorRight, "FRC 1599B");
     motorRotator = new TalonFX(Constants.CAN_IDS.turretMotorRotator, "FRC 1599B");
 
-    //motorHoodLeft = new HiTecServo(Constants.Channels.motorHoodLeft);
+    motorHoodLeft = new HiTecServo(Constants.Channels.motorHoodLeft);
     //motorHoodRight = new HiTecServo(Constants.Channels.motorHoodRight);
+    hoodUp = false;
 
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = 0.2; // An error of 1 rotation results in 2.4 V output
@@ -52,15 +54,16 @@ public class Turret extends SubsystemBase {
     motorRotator.getConfigurator().apply(conf);
 
     Slot0Configs spinMotorConfigs = new Slot0Configs();
-    spinMotorConfigs.kP = 0.4; // An error of 1 rotation results in 2.4 V output
-    spinMotorConfigs.kI = 0; // no output for integrated error
-    spinMotorConfigs.kD = 0; // A velocity of 1 rps results in 0.1 V output
+    spinMotorConfigs.kP = 0.64; // An error of 1 rotation results in 2.4 V output
+    spinMotorConfigs.kI = 0.0; // no output for integrated error
+    spinMotorConfigs.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
 
     motorLeft.getConfigurator().apply(spinMotorConfigs);
     motorRight.getConfigurator().apply(spinMotorConfigs);
 
     targetVelocity = 0;
     gearRatio = 50;
+    setHoodPosition(true);
   }
 
   public void rotate(double speed) {
@@ -78,9 +81,28 @@ public class Turret extends SubsystemBase {
     motorRotator.setControl(m_request);
   }
 
-  public void setHoodPosition(double position) {
-    //motorHoodLeft.setPosition(position);
-    //motorHoodRight.setPosition(position);
+  public boolean getHoodPosition()
+  {
+    return hoodUp;
+  }
+
+  public void setHoodPosition(boolean up) {
+    hoodUp = up;
+    if (hoodUp)
+    {
+      motorHoodLeft.setPosition(0.8);
+      //motorHoodRight.setPosition(1.0);
+    }
+    else
+    {
+      motorHoodLeft.setPosition(0.0);
+      //motorHoodRight.setPosition(0.0);
+    }
+  }
+
+  public double getVelocity()
+  {
+    return motorLeft.getVelocity().getValueAsDouble();
   }
 
   public void spin(double speed) {
@@ -130,9 +152,6 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Left Current", motorLeft.getStatorCurrent().getValueAsDouble());
 
 
-    SmartDashboard.putNumber("Turret Motor Rotator Speed", motorRotator.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Turret Position", motorRotator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("cancoder", turretEncoder.getPosition().getValueAsDouble());
-    //SmartDashboard.putNumber("deploy encoder", new CANcoder(33, "FRC 1599B").getPosition().getValueAsDouble());
+   
   }
 }

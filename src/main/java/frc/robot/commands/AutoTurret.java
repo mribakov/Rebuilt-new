@@ -101,9 +101,9 @@ public class AutoTurret extends Command {
     else
     {
         if (getZone(pose) == 4) {
-          turret.setHoodPosition(0);
+          turret.setHoodPosition(false);
         } else {
-          turret.setHoodPosition(1);
+          turret.setHoodPosition(true);
         }
         double dist = Math.sqrt(Math.pow(pose.getX() - target.x, 2) + Math.pow(pose.getY() - target.y, 2));
         double angle = Math.atan2(pose.getY() - target.y, pose.getX() - target.x);

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -23,7 +24,9 @@ public class Intake extends SubsystemBase {
   private TalonFX feedMotor;
   private TalonFX deployMotor;
   private CANcoder deployEncoder;
-  private final double gearRatio;
+  private boolean runningToPosition;
+  private PositionVoltage m_request;
+  private double setPoint;
   private final PIDController pid = new PIDController(0.01, 0, 0);
 
   public Intake() {
@@ -32,13 +35,19 @@ public class Intake extends SubsystemBase {
     deployEncoder = new CANcoder(33, "FRC 1599B");
 
 
-    Slot0Configs slot0Configs = new Slot0Configs();
-    slot0Configs.kP = 9.5; // An error of 1 rotation results in 2.4 V output
-    slot0Configs.kI = 0.0; // no output for integrated error
-    slot0Configs.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
+    Slot0Configs slot0ConfigsDown = new Slot0Configs();
+    slot0ConfigsDown.kP = 24; // An error of 1 rotation results in 2.4 V output
+    slot0ConfigsDown.kI = 0.0; // no output for integrated error
+    slot0ConfigsDown.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
 
-    deployMotor.getConfigurator().apply(slot0Configs);
-    gearRatio = 45;
+    Slot1Configs slot1ConfigsUp = new Slot1Configs();
+    slot1ConfigsUp.kP = 35; // An error of 1 rotation results in 2.4 V output
+    slot1ConfigsUp.kI = 0.0; // no output for integrated error
+    slot1ConfigsUp.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
+
+    deployMotor.getConfigurator().apply(slot0ConfigsDown);
+    deployMotor.getConfigurator().apply(slot1ConfigsUp);
+    runningToPosition = false;
   }
 
   public void deploy() {
@@ -55,8 +64,14 @@ public class Intake extends SubsystemBase {
 
   public void runToPosition(double deg)
   {
-    final PositionVoltage m_request = new PositionVoltage(deg).withFeedForward(0).withSlot(0);
+    if (Math.abs(deg) < 0.015) // down position
+      m_request = new PositionVoltage(deg).withFeedForward(0).withSlot(0);
+    else
+      m_request = new PositionVoltage(deg).withFeedForward(0).withSlot(1);
+
     deployMotor.setControl(m_request);
+    setPoint = deg;
+    runningToPosition = true;
   }
 
   public double getAngleEncoder() {
@@ -79,5 +94,13 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putNumber("MOTOR Angle", deployMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("MOTOR votlage", deployMotor.getMotorVoltage().getValueAsDouble());
     SmartDashboard.putNumber("MOTOR current", deployMotor.getSupplyCurrent().getValueAsDouble());
+
+    if (runningToPosition)
+    {
+      SmartDashboard.putNumber("run request", m_request.getPositionMeasure().baseUnitMagnitude());
+      SmartDashboard.putNumber("run motor", deployMotor.getPosition().getValueAsDouble());
+      if (Math.abs(setPoint - deployMotor.getPosition().getValueAsDouble()) < 0.05)
+        deployMotor.set(0);
+    }
   }
 }

@@ -17,20 +17,23 @@ import frc.robot.Constants;
 public class Trigger extends SubsystemBase {
   /** Creates a new Trigger. */
 
-  private TalonFX motor;
+  private TalonFX kickUpMotor;
+  private TalonFX indexMotor;
 
   public Trigger() {
 
-    motor = new TalonFX(Constants.CAN_IDS.triggerMotor, "FRC 1599B");
-    
+    kickUpMotor = new TalonFX(Constants.CAN_IDS.kickUpMotor, "FRC 1599B");
+    indexMotor = new TalonFX(Constants.CAN_IDS.indexMotor, "FRC 1599B");
   }
 
   public void shoot() {
-    motor.set(1);
+    kickUpMotor.set(1);
+    indexMotor.set(1);
   }
 
   public void stop() {
-    motor.set(0);
+    kickUpMotor.set(0);
+    indexMotor.set(0);
   }
 
   @Override

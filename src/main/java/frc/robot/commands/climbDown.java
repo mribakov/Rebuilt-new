@@ -15,7 +15,7 @@ public class ClimbDown extends Command {
 
   @Override
   public void initialize() {
-    //climb.goToSetpoint(() -> {return Elevator.Setpoint.Ground;});
+    climb.goToSetpoint(() -> {return Elevator.Setpoint.Starting;});
   }
 
   @Override

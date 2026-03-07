@@ -17,6 +17,12 @@ public class Shoot extends Command {
   }
 
   @Override
+  public void initialize()
+  {
+    System.out.println("Shooter speed " + turret.getVelocity());
+  }
+
+  @Override
   public void execute() {
    
       trigger.shoot();

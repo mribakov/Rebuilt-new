@@ -41,7 +41,7 @@ public class Elevator extends SubsystemBase {
     public enum Setpoint {
         Starting(Rotations.of(0)),
         Middle(Rotations.of(1)),
-        Top(Rotations.of(2.655));
+        Top(Rotations.of(2.1)); // 2.655
 
         /** The position target of the setpoint in angular units. */
         public final Angle target;
@@ -65,7 +65,7 @@ public class Elevator extends SubsystemBase {
     private static final Distance kMaxHeight = Meters.of(0);
 
     /* leader and follower motors */
-    private final CANBus kCANBus = new CANBus("1599-B");
+    private final CANBus kCANBus = new CANBus("FRC 1599B");
     private final TalonFX motor_id_31 = new TalonFX(31, kCANBus);
 
     /* device status signals */
@@ -267,6 +267,8 @@ public class Elevator extends SubsystemBase {
         motor_id_31Mech2d.setLength(
             motor_id_31Position.getValueAsDouble() * kDrumRadius.in(Meters) * 2 * Math.PI
         );
+
+        SmartDashboard.putNumber("climber", motor_id_31.getPosition().getValueAsDouble());
     }
 
     private void startSimThread() {
