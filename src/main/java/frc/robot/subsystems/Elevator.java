@@ -40,8 +40,8 @@ public class Elevator extends SubsystemBase {
     /** Position setpoints for the elevator. */
     public enum Setpoint {
         Starting(Rotations.of(0)),
-        Middle(Rotations.of(1)),
-        Top(Rotations.of(2.1)); // 2.655
+        Middle(Rotations.of(0.868)),
+        Top(Rotations.of(2.36)); // 2.655
 
         /** The position target of the setpoint in angular units. */
         public final Angle target;

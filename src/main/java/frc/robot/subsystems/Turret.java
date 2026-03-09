@@ -60,7 +60,7 @@ public class Turret extends SubsystemBase {
     motorRight.getConfigurator().apply(spinMotorConfigs);
 
     targetVelocity = 0;
-    gearRatio = 50;
+    gearRatio = 10;
     setHoodPosition(true);
   }
 
@@ -137,6 +137,8 @@ public class Turret extends SubsystemBase {
       return true;
     else if (output > 0 && getAngle() < Constants.Turret.maxAngle)
       return true;
+    else if (output == 0)
+      return true;
     else
       return false;
   }
@@ -144,12 +146,11 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("turret angle", motorRotator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("turret position", getAngle());
+    SmartDashboard.putNumber("turret pos", motorRotator.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("turret angle", getAngle());
+    SmartDashboard.putNumber("given output", motorRotator.getMotorVoltage().getValueAsDouble());
 
-    /*
-    if (!isSafe(motorRotator.getMotorOutputStatus().getValueAsDouble())) // ALWAYS check for safety
+    if (!isSafe( motorRotator.getMotorVoltage().getValueAsDouble())) // ALWAYS check for safety
       stopRotator();
-    */
   }
 }

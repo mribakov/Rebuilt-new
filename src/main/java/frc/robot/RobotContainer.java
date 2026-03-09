@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.*;
+import frc.robot.generated.Pigeon;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LinearServo;
 import frc.robot.subsystems.*;
@@ -46,6 +47,7 @@ public class RobotContainer {
     private Trigger trigger;
     private Turret turret;
     private Trigger index;
+    private Pigeon pigeon;
 
     // drivetrain
     private final Field2d field;
@@ -140,9 +142,12 @@ public class RobotContainer {
         drivetrain.seedFieldCentric();
         Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));*/
 
-        //Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
-        //Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
-        
+        Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
+        Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
+        Player1.rightTrigger().onTrue(new TurretTo(turret, 30));
+        Player1.leftTrigger().onTrue(new TurretTo(turret, 50));
+        Player1.start().onTrue(new TurretTo(turret, 86));
+
         Player1.y().onTrue(new DeployIntake(intake));
         Player1.x().onTrue(new RetractIntake(intake));
         Player1.a().whileTrue(new RunIntake(intake));
