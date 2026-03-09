@@ -4,14 +4,19 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +34,10 @@ public class Turret extends SubsystemBase {
   private CANcoder turretEncoder;
   private double targetVelocity;
   private final double gearRatio;
+  private ArrayList<Double> currents;
+  private double realZero;
+  private boolean zeroing;
+  private PIDController pid;
 
   public Turret() {
     motorLeft = new TalonFX(Constants.CAN_IDS.turretMotorLeft, "FRC 1599B");
@@ -37,6 +46,10 @@ public class Turret extends SubsystemBase {
 
     motorHoodLeft = new HiTecServo(Constants.Channels.motorHoodLeft);
     hoodUp = false;
+    currents = new ArrayList<>(7);
+    realZero = 0;
+    zeroing = false;
+    pid = new PIDController(0.014, 0, 0);
 
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = 0.1; // An error of 1 rotation results in 2.4 V output
@@ -66,15 +79,23 @@ public class Turret extends SubsystemBase {
 
   public void rotate(double speed) {
     if (isSafe(speed))
-      motorRotator.set(speed * 0.05);
+      motorRotator.set(speed * 0.15);
     else
       stopRotator();
   }
 
-  public void rotateTo(double degree) {
-    double position = (degree / 360) * gearRatio;
-    final PositionVoltage m_request = new PositionVoltage(position).withSlot(0);
-    motorRotator.setControl(m_request);
+  public void setSetpoint(double degree)
+  {
+    pid.setSetpoint(degree);
+  }
+
+  public void rotateTo() {
+    double out = pid.calculate(getAngle());
+    if (out > 1.0)
+      out = 1.0;
+    else if (out < -1.0)
+      out = -1.0;
+    motorRotator.set(out);
   }
 
   public boolean getHoodPosition()
@@ -103,6 +124,31 @@ public class Turret extends SubsystemBase {
     motorRight.setControl(m_request);
   }
 
+  public void findZero() {
+    zeroing = true;
+    motorRotator.set(-0.08);
+  }
+
+  public void setZero()
+  {
+    realZero = motorRotator.getPosition().getValueAsDouble();
+  }
+
+  public boolean zeroPeriodic() {
+    currents.add(Math.abs(motorRotator.getSupplyCurrent().getValueAsDouble()));
+    
+    int count = 0;
+    for (int i = 1; i < currents.size(); i++) {
+        double delta = Math.abs(currents.get(i) - currents.get(i - 1));
+        if (delta >= 0.1)
+            count++;
+    }
+
+    if (currents.size() > 3)
+      return currents.get(currents.size() - 1) > 1.25 && currents.get(currents.size() - 2) > 1.25 && currents.get(currents.size() - 3) > 1.25;
+    return count > 3;
+  }
+
   public boolean isAtSpeed()
   {
     return Math.abs(getSpeed() - targetVelocity) < Constants.Turret.shooterThreshold;
@@ -118,7 +164,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getAngle() {
-    return (motorRotator.getPosition().getValueAsDouble() / gearRatio) * 360;
+    return ((motorRotator.getPosition().getValueAsDouble() - realZero) / gearRatio) * 360;
   }
 
   public double getSpeed() {
@@ -149,8 +195,12 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("turret pos", motorRotator.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("turret angle", getAngle());
     SmartDashboard.putNumber("given output", motorRotator.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("turret curent output", motorRotator.getSupplyCurrent().getValueAsDouble());
 
-    if (!isSafe( motorRotator.getMotorVoltage().getValueAsDouble())) // ALWAYS check for safety
-      stopRotator();
+    if (!zeroing)
+    {
+      if (!isSafe(motorRotator.getMotorVoltage().getValueAsDouble())) // ALWAYS check for safety
+        stopRotator();
+    }
   }
 }

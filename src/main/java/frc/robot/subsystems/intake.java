@@ -36,12 +36,12 @@ public class Intake extends SubsystemBase {
 
 
     Slot0Configs slot0ConfigsDown = new Slot0Configs();
-    slot0ConfigsDown.kP = 6.5;//24; // An error of 1 rotation results in 2.4 V output
-    slot0ConfigsDown.kI = 0.0; // no output for integrated error
+    slot0ConfigsDown.kP = 30;//6.5; // An error of 1 rotation results in 2.4 V output
+    slot0ConfigsDown.kI = 2.0; // no output for integrated error
     slot0ConfigsDown.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
 
     Slot1Configs slot1ConfigsUp = new Slot1Configs();
-    slot1ConfigsUp.kP = 50;//35; // An error of 1 rotation results in 2.4 V output
+    slot1ConfigsUp.kP = 5.5;//35; // An error of 1 rotation results in 2.4 V output
     slot1ConfigsUp.kI = 0.0; // no output for integrated error
     slot1ConfigsUp.kD = 0.0; // A velocity of 1 rps results in 0.1 V output
 
@@ -51,11 +51,11 @@ public class Intake extends SubsystemBase {
   }
 
   public void deploy() {
-      runToPosition(.32);
+      runToPosition(.36);
   }
 
   public void retract() {
-      runToPosition(0);
+      runToPosition(-0.03);
   }
 
   public void intake() {

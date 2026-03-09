@@ -37,6 +37,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     
+    Pigeon2 p;
     private LimelightHelpers.PoseEstimate lastPose = null;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -128,6 +129,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, modules);
+        p = new Pigeon2(38);
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -240,7 +242,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-        Pigeon2 p = new Pigeon2(38);
         SmartDashboard.putNumber("pigeon yaw", p.getYaw().getValueAsDouble());
         SmartDashboard.putNumber("pigeon pitch", p.getPitch().getValueAsDouble());
         SmartDashboard.putNumber("pigeon roll", p.getRoll().getValueAsDouble());

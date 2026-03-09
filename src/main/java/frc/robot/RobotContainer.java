@@ -142,8 +142,8 @@ public class RobotContainer {
         drivetrain.seedFieldCentric();
         Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));*/
 
-        Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
-        Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
+        //Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
+        //Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
         Player1.rightTrigger().onTrue(new TurretTo(turret, 30));
         Player1.leftTrigger().onTrue(new TurretTo(turret, 50));
         Player1.start().onTrue(new TurretTo(turret, 86));
@@ -151,11 +151,13 @@ public class RobotContainer {
         Player1.y().onTrue(new DeployIntake(intake));
         Player1.x().onTrue(new RetractIntake(intake));
         Player1.a().whileTrue(new RunIntake(intake));
-        Player1.b().whileTrue(new Shoot(turret, trigger));
+        //Player1.b().whileTrue(new Shoot(turret, trigger));
 
         Player1.povDown().onTrue(new StopTurretWheels(turret));
         Player1.povRight().onTrue(new SpinToSpeed(turret, 40));
         Player1.povUp().onTrue(new ToggleHood(turret));
+
+        Player1.b().onTrue(new ZeroTurret(turret));
 
         turret.setDefaultCommand(new ManualTurret(turret, () -> { return Player1.getLeftX(); }));
     }
