@@ -109,7 +109,7 @@ public class AutoTurret extends Command {
         double angle = Math.atan2(pose.getY() - target.y, pose.getX() - target.x);
         angle -= pose.getRotation().getRadians();
         angle = Math.toDegrees(angle);
-        turret.rotateTo(angle);
+        //turret.rotateTo(angle);
 
         if (Math.abs(angle) <= 60)
         {

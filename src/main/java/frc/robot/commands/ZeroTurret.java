@@ -10,35 +10,28 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Turret;
 
-public class TurretTo extends Command {
+public class ZeroTurret extends Command {
   private Turret turret;
-  private double ang;
 
-  public TurretTo(Turret turret, double ang) {
+  public ZeroTurret(Turret turret) {
     this.turret = turret;
-    this.ang = ang;
     addRequirements(turret);
   }
 
   @Override
   public void initialize()
   {
-    turret.setSetpoint(ang);
-  }
-
-  @Override
-  public void execute()
-  {
-    turret.rotateTo();
+    turret.findZero();
   }
 
   @Override
   public void end(boolean interrupted) {
     turret.stopRotator();
+    turret.setZero();
   }
 
   @Override
   public boolean isFinished() {
-    return Math.abs(turret.getAngle() - ang) < Constants.Turret.angleThreshold;
+    return turret.zeroPeriodic();
   }
 }
