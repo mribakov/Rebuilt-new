@@ -36,6 +36,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import frc.robot.Telemetry;
+import frc.robot.Constants.Speed;
 
 public class RobotContainer {
 
@@ -91,7 +92,16 @@ public class RobotContainer {
     {
         // replace null with command instance
         // do this for all commands
-        NamedCommands.registerCommand("Test Event", new RunIntake(intake));
+        NamedCommands.registerCommand("intake", new RunIntake(intake));
+        NamedCommands.registerCommand("shoot",  new SpinToSpeed(turret, MaxSpeed));
+        NamedCommands.registerCommand("kickup", new Shoot(turret, trigger));
+        NamedCommands.registerCommand("deploy intake", new DeployIntake(intake));
+        NamedCommands.registerCommand("retract intake", new RetractIntake(intake));
+        NamedCommands.registerCommand("auto turret", new AutoTurret(turret, trigger, drivetrain));
+        NamedCommands.registerCommand("line up climb", new LineUpClimb(drivetrain));
+        NamedCommands.registerCommand("toggle hood", new SetServoPosition(null, MaxAngularRate));
+        NamedCommands.registerCommand("climb up", new ClimbUp(climber));
+        NamedCommands.registerCommand("climb down", new ClimbDown(climber));
     }
 
     public Command getAutonomousCommand() {
