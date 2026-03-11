@@ -68,6 +68,7 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final Telemetry logger = new Telemetry(MaxSpeed);
+    
 
     // IO devices
     private final CommandXboxController Player1 = new CommandXboxController(0);
@@ -85,6 +86,12 @@ public class RobotContainer {
         trigger = new Trigger();
         turret = new Turret();
         autoChooser = AutoBuilder.buildAutoChooser();
+
+    // Define zones as bounding boxes
+    //boolean Zone0 = pose.getX() >= 491 && pose.getY() > 108;
+    //boolean Zone1 = pose.getX() > 14.0;
+
+        SmartDashboard.putData("Field", field);
 
         boolean isCompetition = true;
         // Do all other initialization
@@ -169,11 +176,6 @@ public class RobotContainer {
         JoystickButton RedButton = new JoystickButton(Player2, RedArcade);
         JoystickButton BlueButton = new JoystickButton(Player2, BlueArcade);
         JoystickButton GreenButton = new JoystickButton(Player2, GreenArcade);
-
-
-
-
-
 
         drivetrain.seedFieldCentric();
         Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
