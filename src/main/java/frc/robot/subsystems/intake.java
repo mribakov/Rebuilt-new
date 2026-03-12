@@ -86,7 +86,7 @@ public class Intake extends SubsystemBase {
   }
 
   public double getAngleEncoder() {
-    return (deployMotor.getPosition().getValueAsDouble());
+    return (deployMotor.getPosition().getValueAsDouble() + 1);
   }
 
   public void outtake() {

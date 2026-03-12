@@ -45,6 +45,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+
     
     Pigeon2 p;
     private LimelightHelpers.PoseEstimate lastPose = null;
@@ -151,8 +153,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this::getPose,
             this::resetPose,
             this::getRobotRelativeSpeeds,
-            (speeds, feedforwards) -> driveRobotRelative(speeds),
-            new PPLTVController(0.02),
+            (speeds, feedforwards) -> setControl(
+                    m_pathApplyRobotSpeeds.withSpeeds(speeds)
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                 ),
+                new PPHolonomicDriveController(
+                    // PID constants for translation
+                    new PIDConstants(10, 0, 0),
+                    // PID constants for rotation
+                    new PIDConstants(7, 0, 0)
+                ),
             config,
             () -> {
 
