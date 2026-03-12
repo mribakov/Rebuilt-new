@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.Limelight;
 import frc.robot.util.LinearServo;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -241,9 +242,6 @@ public class RobotContainer {
         Player1.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
         //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
         //TODO: manual hood, and turret rotator
-
-        Player1.povRight().whileTrue(new TurnTurret(Limelight.getTurretSpeed()));
-
     }
 
 }
