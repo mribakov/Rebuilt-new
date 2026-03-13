@@ -198,12 +198,12 @@ public class RobotContainer {
         
         //Player1.y().onTrue(new DeployIntake(intake));
         //Player1.x().onTrue(new RetractIntake(intake));
-        /*Player1.a().whileTrue(new RunIntake(intake));
-        Player1.b().whileTrue(new Shoot(turret, trigger));
+        //Player1.a().whileTrue(new RunIntake(intake));
+       // Player1.b().whileTrue(new Shoot(turret, trigger));
 
-        Player1.povDown().onTrue(new StopTurretWheels(turret));
-        Player1.povRight().onTrue(new SpinToSpeed(turret, 80)); //shot
-        Player1.povUp().onTrue(new ToggleHood(turret));*/
+       // Player1.povDown().onTrue(new StopTurretWheels(turret));
+        Player1.povRight().onTrue(new SpinToSpeed(turret, 60)); //shot
+       // Player1.povUp().onTrue(new ToggleHood(turret));*/
 
         //turret.setDefaultCommand(new ManualTurret(turret, () -> { return Player2.getLeftX(); }));
 
@@ -233,7 +233,7 @@ public class RobotContainer {
         Player1.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
 
         Player1.rightTrigger().whileTrue(new ParallelCommandGroup(
-            new SpinToSpeed(turret, 70),    
+            //new SpinToSpeed(turret, 70),    
             new Shoot(turret, trigger)
         )); // shoot and kick up, shooter first then kickup
 
