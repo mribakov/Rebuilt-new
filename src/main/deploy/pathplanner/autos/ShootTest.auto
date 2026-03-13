@@ -7,7 +7,26 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ShootStart"
+            "pathName": "Human Player to Shoot"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot distance"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "deploy intake"
+                }
+              }
+            ]
           }
         }
       ]

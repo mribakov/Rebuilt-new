@@ -121,8 +121,13 @@ public class RobotContainer {
         // replace null with command instance
         // do this for all commands
         NamedCommands.registerCommand("intake", new RunIntake(intake));
-        NamedCommands.registerCommand("shoot",  new SpinToSpeed(turret, MaxSpeed));
+        NamedCommands.registerCommand("shoot",  new SpinToDistanceSpeed(turret));
+        NamedCommands.registerCommand("shoot distance", new SequentialCommandGroup(
+            new SpinToDistanceSpeed(turret),
+            new AutoShoot(turret, trigger)
+        ));
         NamedCommands.registerCommand("kickup", new Shoot(turret, trigger));
+        NamedCommands.registerCommand("auto shoot", new AutoShoot(turret, trigger));
         NamedCommands.registerCommand("deploy intake", new DeployIntake(intake));
         NamedCommands.registerCommand("retract intake", new RetractIntake(intake));
         NamedCommands.registerCommand("auto turret", new AutoTurret(turret, trigger, drivetrain));
@@ -234,7 +239,7 @@ public class RobotContainer {
         //Player1.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
 
         Player1.rightTrigger().whileTrue(new ParallelCommandGroup(
-            new SpinToSpeed(turret, 70),    
+            turret.startEnd(turret::spinAtDistance, turret::stopShooter),
             new Shoot(turret, trigger)
         )); // shoot and kick up, shooter first then kickup
 
@@ -243,6 +248,7 @@ public class RobotContainer {
         Player1.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
         //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
         //TODO: manual hood, and turret rotator
-    }
+        Player1.povDown().whileTrue(new TurnTurret(turret));
+    }   
 
 }
