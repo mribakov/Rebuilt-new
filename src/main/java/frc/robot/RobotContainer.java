@@ -122,6 +122,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("intake", new RunIntake(intake));
         NamedCommands.registerCommand("shoot",  new SpinToSpeed(turret, MaxSpeed));
         NamedCommands.registerCommand("kickup", new Shoot(turret, trigger));
+        NamedCommands.registerCommand("auto shoot", new AutoShoot(turret, trigger));
         NamedCommands.registerCommand("deploy intake", new DeployIntake(intake));
         NamedCommands.registerCommand("retract intake", new RetractIntake(intake));
         NamedCommands.registerCommand("auto turret", new AutoTurret(turret, trigger, drivetrain));
