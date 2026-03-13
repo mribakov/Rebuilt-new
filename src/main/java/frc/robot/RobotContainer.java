@@ -93,7 +93,7 @@ public class RobotContainer {
     
     public RobotContainer() {
 
-        mapEventsToCommands();
+        //mapEventsToCommands();
         climber = new Elevator();
         intake = new Intake();
         trigger = new Trigger();

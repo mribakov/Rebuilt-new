@@ -15,11 +15,16 @@ import java.util.Set;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
+import frc.robot.subsystems.LimelightHelpers;
+import frc.robot.util.Limelight;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -33,8 +38,18 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void robotInit() {
+    HttpCamera limelightCamera = new HttpCamera("limelight-turret", "http://10.15.99.15:5800/stream.mjpg");
+    CameraServer.startAutomaticCapture(limelightCamera);
+  }
+
+  @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    SmartDashboard.putNumber("Turret Limelight read distance", LimelightHelpers.getTA("limelight-tur"));
+    SmartDashboard.putNumber("Turret Limelight is reading", Limelight.getTY());
+    SmartDashboard.putBoolean("LL Connected", NetworkTableInstance.getDefault().getTable("limelight-tur").containsKey("tv"));
+
     
   }
 
@@ -74,8 +89,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
    // m_robotContainer.Periodic();
-   RobotContainer.getField().setRobotPose(RobotContainer.getCurrentPose());
-    
+   RobotContainer.getField().setRobotPose(RobotContainer.getCurrentPose());    
   }
 
   @Override

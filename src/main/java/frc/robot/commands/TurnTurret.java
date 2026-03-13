@@ -21,7 +21,11 @@ public class TurnTurret extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
+  public void initialize() {}
+
+  // Called every scheduler cycle while the command is running.
+  @Override
+  public void execute() {
     turret.autoRotate();
   }
 

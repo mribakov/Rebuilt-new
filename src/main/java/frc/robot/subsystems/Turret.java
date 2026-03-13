@@ -130,7 +130,7 @@ public class Turret extends SubsystemBase {
   public void autoRotate() {
     double position = Limelight.getTurretSpeed();
     if (isSafe(position)) {
-      motorRotator.set(position); 
+      motorRotator.set(-position);
     }
   }
 

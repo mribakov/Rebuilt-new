@@ -9,9 +9,9 @@ import frc.robot.subsystems.LimelightHelpers;
 import frc.robot.subsystems.LimelightHelpers.PoseEstimate;
 
 public class Limelight {
-    private final static String limelightName = "limelight-turret";
+    private final static String limelightName = "limelight-tur";
     private final static NetworkTable limelight = NetworkTableInstance.getDefault().getTable(limelightName);
-    private final static PIDController turretPID = new PIDController(0.05, 0, 0);
+    private final static PIDController turretPID = new PIDController(0.01, 0, 0);
 
     public static double getTurretSpeed() {
         return turretPID.calculate(getTX(), 0); // , 0 <--- this is desired value.
