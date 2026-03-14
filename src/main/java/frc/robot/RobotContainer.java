@@ -199,9 +199,11 @@ public class RobotContainer {
         */
         
         Player2.y().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
-        Player2.b().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
-        Player2.a().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Middle;}));
+        Player2.b().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Middle;}));
+        Player2.a().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
         turret.setDefaultCommand(new ManualTurret(turret, () -> { return Player2.getLeftX(); }));
+        Player2.povUp().whileTrue(new ManualClimb(climber, true));
+        Player2.povDown().whileTrue(new ManualClimb(climber, false));
         
         drivetrain.seedFieldCentric();
         Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -241,22 +243,21 @@ public class RobotContainer {
 
         Player1.x().onTrue(new DeployIntake(intake)); // deploy
         Player1.y().onTrue(new RetractIntake(intake)); // retract
-
-        //Player1.a().whileTrue(new ManualDeploy(intake, 0.15)); // down
-        //Player1.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
+        Player1.a().whileTrue(new ManualDeploy(intake, 0.15)); // down
+        Player1.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
 
         Player1.rightTrigger().whileTrue(new ParallelCommandGroup(
             turret.startEnd(turret::spinAtDistance, turret::stopShooter),
             new Shoot(turret, trigger)
         )); // shoot and kick up, shooter first then kickup
 
-        Player1.rightBumper().onTrue(new StopTurretWheels(turret));
-        Player1.leftBumper().onTrue(new ReverseShoot(turret, trigger));
+        Player1.povUp().onTrue(new StopTurretWheels(turret));
+        Player1.rightBumper().onTrue(new ReverseShoot(turret, trigger));
 
         Player1.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
         //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
         //TODO: manual hood, and turret rotator
-        Player1.povDown().whileTrue(new TurnTurret(turret));
+        Player1.povDown().toggleOnTrue(new TurnTurret(turret));
     }   
 
 }
