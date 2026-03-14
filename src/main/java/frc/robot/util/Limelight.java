@@ -14,7 +14,13 @@ public class Limelight {
     private final static PIDController turretPID = new PIDController(0.05, 0, 0);
 
     public static double getTurretSpeed() {
-        return turretPID.calculate(getTX(), 0); // , 0 <--- this is desired value.
+        double tx = getTX();
+        if (tx > 1)
+            return 0.15;
+        else if (tx < -1)
+            return -0.15;
+        return 0;
+        //return turretPID.calculate(getTX(), 0); // , 0 <--- this is desired value.
     }
 
     public static double getTA() {

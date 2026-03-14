@@ -99,6 +99,7 @@ public class RobotContainer {
         trigger = new Trigger();
         turret = new Turret();
         autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.addOption("Just Zero Turret", new ZeroTurret(turret));
 
 
     // Define zones as bounding boxes
@@ -259,7 +260,7 @@ public class RobotContainer {
         Player1.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
         //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
         //TODO: manual hood, and turret rotator
-        Player1.povDown().toggleOnTrue(new TurnTurret(turret));
+        Player1.leftBumper().toggleOnTrue(new TurnTurret(turret));
     }   
 
 }
