@@ -122,14 +122,16 @@ public class RobotContainer {
         // do this for all commands
         NamedCommands.registerCommand("intake", new RunIntake(intake));
         NamedCommands.registerCommand("shoot",  new SpinToDistanceSpeed(turret));
-        NamedCommands.registerCommand("shoot distance", new SequentialCommandGroup(
-            new TurnTurret(turret),
-            new SpinToDistanceSpeed(turret),
-            new AutoShoot(turret, trigger)
-        ));
+        NamedCommands.registerCommand("shoot distance", null);
+        // NamedCommands.registerCommand("shoot distance", new SequentialCommandGroup(
+        //     new TurnTurret(turret),
+        //     new SpinToDistanceSpeed(turret),
+        //     new AutoShoot(turret, trigger)
+        // ));
         NamedCommands.registerCommand("kickup", new Shoot(turret, trigger));
         NamedCommands.registerCommand("auto shoot", new AutoShoot(turret, trigger));
-        NamedCommands.registerCommand("deploy intake", new DeployIntake(intake));
+        //NamedCommands.registerCommand("deploy intake", new DeployIntake(intake));
+        NamedCommands.registerCommand("deploy intake", null);
         NamedCommands.registerCommand("retract intake", new RetractIntake(intake));
         NamedCommands.registerCommand("auto turret", new AutoTurret(turret, trigger, drivetrain));
         NamedCommands.registerCommand("line up climb", new LineUpClimb(drivetrain));
@@ -189,7 +191,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> 
                 drive.withVelocityX(-(Player1.getLeftY()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive forward with negative Y (forward)
                     .withVelocityY(-(Player1.getLeftX()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive left with negative X (left)
-                    .withRotationalRate(-Player1.getRightX() * Constants.Drive.MaxAngularRate) // Drive counterclockwise with negative X (left)
+                    .withRotationalRate(-Player1.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
