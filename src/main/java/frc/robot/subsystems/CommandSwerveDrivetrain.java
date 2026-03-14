@@ -326,7 +326,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Feed limelight MegaTag2 pose into the pose estimator
         LimelightHelpers.SetRobotOrientation("limelight-turret",
             getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        savePose(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-turret"));
+        if (DriverStation.getAlliance().get() == Alliance.Blue)
+            savePose(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-turret"));
+        else
+            savePose(LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-turret"));
     }
     
     private void configureAutoBuilder(){

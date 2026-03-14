@@ -15,10 +15,14 @@ public class Limelight {
 
     public static double getTurretSpeed() {
         double tx = getTX();
-        if (tx > 1)
+        if (tx > 10)
             return 0.15;
-        else if (tx < -1)
+        if (tx > 3)
+            return 0.07;
+        else if (tx < -10)
             return -0.15;
+        else if (tx < -3)
+            return -0.07;
         return 0;
         //return turretPID.calculate(getTX(), 0); // , 0 <--- this is desired value.
     }
