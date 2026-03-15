@@ -11,7 +11,7 @@ import frc.robot.subsystems.Intake;
 public class DeployJumpCommand extends Command {
   private static final double upDuration = 0.62;
   private static final double downDuration = 0.45;
-  private static final double speed = 0.15;
+  private static final double speed = 0.22;
 
   private final Intake intake;
   private final Timer intervalTimer = new Timer();

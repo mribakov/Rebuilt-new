@@ -75,7 +75,7 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(MaxSpeed * 0.14).withRotationalDeadband(MaxAngularRate * 0.14) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -123,8 +123,8 @@ public class RobotContainer {
         new Shoot(turret, trigger).withTimeout(12),
         new StopTurretWheels(turret)
         ));
-
-        autoChooser.addOption("Human Player Shoot", new SequentialCommandGroup(
+        //Correct for blue.
+        autoChooser.addOption("Human Player Shoot (Blue)", new SequentialCommandGroup(
         new ParallelCommandGroup(
             new ManualDeploy(intake, 0.15).withTimeout(0.5),
             new SequentialCommandGroup(
@@ -150,7 +150,43 @@ public class RobotContainer {
             ),
         new SpinToDistanceSpeed(turret),
         new TurnTurret(turret).withTimeout(1.5),
-        new Shoot(turret, trigger).withTimeout(12),
+        new ParallelCommandGroup(
+            new DeployJumpCommand(intake).withTimeout(12),
+            new Shoot(turret, trigger).withTimeout(12)
+        ).withTimeout(12),
+        new StopTurretWheels(turret)
+        ));
+
+        autoChooser.addOption("Human Player Shoot (RED)", new SequentialCommandGroup(
+        new ParallelCommandGroup(
+            new ManualDeploy(intake, 0.15).withTimeout(0.5),
+            new SequentialCommandGroup(
+                drivetrain.applyRequest(() -> drive.withVelocityX(0)
+                            .withVelocityY(-0.6 * MaxSpeed)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(4.75),
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(0.2)
+            )),
+        new WaitCommand(2),
+        new SequentialCommandGroup(
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(0.6 * MaxSpeed)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(1.5),
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(0.2)
+            ),
+        new SpinToDistanceSpeed(turret),
+        new TurnTurret(turret).withTimeout(1.5),
+        new ParallelCommandGroup(
+            new DeployJumpCommand(intake).withTimeout(12),
+            new Shoot(turret, trigger).withTimeout(12)
+        ).withTimeout(12),
         new StopTurretWheels(turret)
         ));
 
@@ -226,11 +262,11 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-Player1.getLeftY() * MaxSpeed) // Drive forward with
+                drivetrain.applyRequest(() -> drive.withVelocityX(-getLeftY() * MaxSpeed) // Drive forward with
                                                                                                    // negative Y
                                                                                                    // (forward)
-                        .withVelocityY(-Player1.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-Player1.getRightX() * MaxAngularRate) // Drive counterclockwise with
+                        .withVelocityY(-getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-getRightX() * MaxAngularRate) // Drive counterclockwise with
                                                                                     // negative X (left)
         ));
 
@@ -255,16 +291,51 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
+    public void startTeleop()
+    {
+        turret.stopRotator();
+        turret.stopShooter();
+        intake.stopWheels();
+        intake.stopDeploy();
+    }
 
+    //player 1 and 2 stick getters.
+
+    public double getLeftY() 
+    {
+        double player1 = Player1.getLeftY();
+        double player2 = Player2.getLeftY();
+
+        if (Math.abs(player1) > Math.abs(player2)) {return player1;}
+        return player2;
+    }
+
+    public double getLeftX() 
+    {
+        double player1 = Player1.getLeftX();
+        double player2 = Player2.getLeftX();
+
+        if (Math.abs(player1) > Math.abs(player2)) {return player1;}
+        return player2;
+    }
+
+    public double getRightX() 
+    {
+        double player1 = Player1.getRightX();
+        double player2 = Player2.getRightX();
+
+        if (Math.abs(player1) > Math.abs(player2)) {return player1;}
+        return player2;
+    }
 
     private void configureBindings() {
         configureDrivetrain();
  drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() -> 
-                drive.withVelocityX(-(Player1.getLeftY()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive forward with negative Y (forward)
-                    .withVelocityY(-(Player1.getLeftX()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive left with negative X (left)
-                    .withRotationalRate(-Player1.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-(getLeftY()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive forward with negative Y (forward)
+                    .withVelocityY(-(getLeftX()) * ((Constants.Drive.MaxSpeed) / Constants.Drive.Speed)) // Drive left with negative X (left)
+                    .withRotationalRate(-(getRightX()) * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -273,15 +344,16 @@ public class RobotContainer {
         JoystickButton GreenButton = new JoystickButton(Player2, GreenArcade);
         */
         
-        Player2.y().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
-        //Player2.b().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Middle;}));
-        Player2.a().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
-        turret.setDefaultCommand(new ManualTurret(turret, () -> { return Player2.getLeftX(); }));
-        Player2.povUp().whileTrue(new ManualClimb(climber, true));
-        Player2.povDown().whileTrue(new ManualClimb(climber, false));
+        // Player2.y().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
+        // //Player2.b().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Middle;}));
+        // Player2.a().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
+        // turret.setDefaultCommand(new ManualTurret(turret, () -> { return Player2.getLeftX(); }));
+        // Player2.povUp().whileTrue(new ManualClimb(climber, true));
+        // Player2.povDown().whileTrue(new ManualClimb(climber, false));
         
-        drivetrain.seedFieldCentric();
+        // drivetrain.seedFieldCentric();
         Player1.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        Player2.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         //Player1.rightBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Top;}));
         //Player1.leftBumper().onTrue(climber.goToSetpoint(() -> {return Elevator.Setpoint.Starting;}));
@@ -334,6 +406,26 @@ public class RobotContainer {
         //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
         //TODO: manual hood, and turret rotator
         Player1.leftBumper().toggleOnTrue(new TurnTurret(turret));
+
+        //Player 2 controls
+        Player2.x().onTrue(new DeployIntake(intake)); // deploy
+        Player2.y().onTrue(new RetractIntake(intake)); // retract
+        Player2.a().whileTrue(new ManualDeploy(intake, 0.15)); // down
+        Player2.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
+
+        Player2.rightTrigger().whileTrue(new ParallelCommandGroup(
+            new DeployJumpCommand(intake),
+            new SpinToSpeedInterrupt(turret, Constants.Turret.speedFar),
+            new Shoot(turret, trigger)
+        )); // shoot and kick up, shooter first then kickup
+
+        Player2.povUp().onTrue(new StopTurretWheels(turret));
+        Player2.rightBumper().whileTrue(new ReverseShoot(turret, trigger));
+
+        Player2.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
+        //Player2.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
+        //TODO: manual hood, and turret rotator
+        Player2.leftBumper().toggleOnTrue(new TurnTurret(turret));
     }   
 
 }
