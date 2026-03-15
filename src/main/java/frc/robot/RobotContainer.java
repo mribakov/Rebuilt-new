@@ -111,7 +111,7 @@ public class RobotContainer {
         new StopTurretWheels(turret)
         ));
         autoChooser.addOption("Center Shoot", new SequentialCommandGroup(
-        drivetrain.applyRequest(() -> drive.withVelocityX(-0.4 * MaxSpeed)
+        drivetrain.applyRequest(() -> drive.withVelocityX(0.4 * MaxSpeed)
                        .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
                        .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with
         ).withTimeout(3.5),
@@ -323,7 +323,7 @@ public class RobotContainer {
 
         Player1.rightTrigger().whileTrue(new ParallelCommandGroup(
             new DeployJumpCommand(intake),
-            turret.startEnd(turret::spinAtDistance, turret::stopShooter),
+            new SpinToSpeedInterrupt(turret, Constants.Turret.speedFar),
             new Shoot(turret, trigger)
         )); // shoot and kick up, shooter first then kickup
 
