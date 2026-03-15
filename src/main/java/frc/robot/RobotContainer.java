@@ -123,6 +123,37 @@ public class RobotContainer {
         new Shoot(turret, trigger).withTimeout(12),
         new StopTurretWheels(turret)
         ));
+
+        autoChooser.addOption("Human Player Shoot", new SequentialCommandGroup(
+        new ParallelCommandGroup(
+            new ManualDeploy(intake, 0.15).withTimeout(0.5),
+            new SequentialCommandGroup(
+                drivetrain.applyRequest(() -> drive.withVelocityX(0)
+                            .withVelocityY(0.6 * MaxSpeed)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(4.75),
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(0.2)
+            )),
+        new WaitCommand(2),
+        new SequentialCommandGroup(
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(-0.6 * MaxSpeed)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(1.5),
+                drivetrain.applyRequest(() -> drive.withVelocityX(0 * MaxSpeed)
+                            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                            .withRotationalRate(0) // Drive counterclockwise with
+                ).withTimeout(0.2)
+            ),
+        new SpinToDistanceSpeed(turret),
+        new TurnTurret(turret).withTimeout(1.5),
+        new Shoot(turret, trigger).withTimeout(12),
+        new StopTurretWheels(turret)
+        ));
+
         autoChooser.addOption("Feeder Shoot", new SequentialCommandGroup(
         new ManualDeploy(intake, 0.15).withTimeout(0.5),
         new ParallelCommandGroup(
