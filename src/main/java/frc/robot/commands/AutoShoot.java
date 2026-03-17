@@ -35,7 +35,7 @@ public class AutoShoot extends Command {
         feedDelayTimer.start();
         feedStarted = true;
       }
-      if (feedDelayTimer.get() >= Constants.Turret.autoShootFeedDelay) {
+      if (feedDelayTimer.get() >= Constants.Turret.AUTO_SHOOT_FEED_DELAY_SECS) {
         trigger.shoot();
       }
     } else {

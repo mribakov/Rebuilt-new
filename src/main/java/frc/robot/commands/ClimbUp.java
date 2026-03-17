@@ -20,6 +20,6 @@ public class ClimbUp extends Command {
 
   @Override
   public boolean isFinished() {
-    return Math.abs(climb.getPosition().magnitude() - Elevator.Setpoint.Middle.target.magnitude()) <= Constants.Climber.threshold; // meeseeks
+    return Math.abs(climb.getPosition().magnitude() - Elevator.Setpoint.Middle.target.magnitude()) <= Constants.Climber.SETPOINT_THRESHOLD_ROT;
   }
 }

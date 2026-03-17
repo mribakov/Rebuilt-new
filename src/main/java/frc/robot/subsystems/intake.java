@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void intake() {
-    feedMotor.set(Constants.Intake.intakeSpeed);
+    feedMotor.set(Constants.Intake.INTAKE_SPEED);
   }
 
   public void deployManual(double speed) {
@@ -103,7 +103,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void outtake() {
-    feedMotor.set(-Constants.Intake.intakeSpeed);
+    feedMotor.set(-Constants.Intake.INTAKE_SPEED);
   }
 
   public void stopWheels() {

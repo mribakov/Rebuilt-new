@@ -180,10 +180,10 @@ public class Turret extends SubsystemBase {
     SoftwareLimitSwitchConfigs limitConf = new SoftwareLimitSwitchConfigs();
     limitConf.ForwardSoftLimitEnable = true;
     limitConf.ForwardSoftLimitThreshold =
-        realZero + (Constants.Turret.maxAngle / 360.0) * Constants.Turret.GEAR_RATIO;
+        realZero + (Constants.Turret.MAX_ANGLE_DEG / 360.0) * Constants.Turret.GEAR_RATIO;
     limitConf.ReverseSoftLimitEnable = true;
     limitConf.ReverseSoftLimitThreshold =
-        realZero + (Constants.Turret.minAngle / 360.0) * Constants.Turret.GEAR_RATIO;
+        realZero + (Constants.Turret.MIN_ANGLE_DEG / 360.0) * Constants.Turret.GEAR_RATIO;
     motorRotator.getConfigurator().apply(limitConf);
     zeroing = false;
     commandedDirection = 0;
@@ -209,7 +209,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isAtSpeed() {
-    return Math.abs(getVelocity() - targetVelocity) < Constants.Turret.shooterThreshold;
+    return Math.abs(getVelocity() - targetVelocity) < Constants.Turret.SHOOTER_THRESHOLD_RPS;
   }
 
   public void stopShooter() {
@@ -237,8 +237,8 @@ public class Turret extends SubsystemBase {
    * Negative output = moving toward minAngle; positive = toward maxAngle.
    */
   public boolean isSafe(double output) {
-    if (output < 0 && getAngle() > Constants.Turret.minAngle) return true;
-    if (output > 0 && getAngle() < Constants.Turret.maxAngle) return true;
+    if (output < 0 && getAngle() > Constants.Turret.MIN_ANGLE_DEG) return true;
+    if (output > 0 && getAngle() < Constants.Turret.MAX_ANGLE_DEG) return true;
     if (output == 0) return true;
     return false;
   }

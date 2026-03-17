@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Turret;
@@ -39,6 +37,6 @@ public class TurretTo extends Command {
 
   @Override
   public boolean isFinished() {
-    return Math.abs(turret.getAngle() - ang) < Constants.Turret.angleThreshold;
+    return Math.abs(turret.getAngle() - ang) < Constants.Turret.ANGLE_THRESHOLD_DEG;
   }
 }
