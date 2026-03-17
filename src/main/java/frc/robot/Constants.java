@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.generated.TunerConstants;
 
 /**
@@ -217,6 +218,16 @@ public class Constants {
         public static final double TURRET_SPEED_FAST   = 0.15;
         /** Rotation speed when tx error ≤ TX_THRESHOLD_LARGE. */
         public static final double TURRET_SPEED_SLOW   = 0.07;
+    }
+
+    // =========================================================================
+    // Field geometry
+    // =========================================================================
+    public static class Field {
+        /** Center of the Blue alliance hub (meters, WPILib origin). */
+        public static final Translation2d BLUE_HUB = new Translation2d(4.611, 4.035);
+        /** Center of the Red alliance hub (meters, WPILib origin). */
+        public static final Translation2d RED_HUB  = new Translation2d(11.927, 4.035);
     }
 
     // =========================================================================

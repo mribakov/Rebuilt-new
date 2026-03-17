@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.ArrayList;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import edu.wpi.first.math.filter.LinearFilter;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -29,8 +30,8 @@ import frc.robot.util.LinearServo;
 
 public class Turret extends SubsystemBase {
 
-  private final TalonFX motorLeft;
-  private final TalonFX motorRight;
+  private final TalonFX flywheelLeft;
+  private final TalonFX flywheelRight;
   private final TalonFX motorRotator;
   private final LinearServo motorHoodLeft;
   private final CANcoder turretEncoder;
@@ -41,7 +42,8 @@ public class Turret extends SubsystemBase {
   private final PositionVoltage m_rotatorPositionRequest = new PositionVoltage(0).withSlot(0);
 
   // Cached status signals — refresh once per periodic, then read .getValue()
-  private final StatusSignal<edu.wpi.first.units.measure.AngularVelocity> m_leftVelocity;
+  private final StatusSignal<edu.wpi.first.units.measure.AngularVelocity> m_flywheelLeftVelocity;
+  private final StatusSignal<edu.wpi.first.units.measure.AngularVelocity> m_flywheelRightVelocity;
   private final StatusSignal<edu.wpi.first.units.measure.Angle> m_rotatorPosition;
   private final StatusSignal<edu.wpi.first.units.measure.Current> m_rotatorCurrent;
 
@@ -54,28 +56,32 @@ public class Turret extends SubsystemBase {
   private double commandedDirection = 0;
   private final ArrayList<Double> currents = new ArrayList<>(7);
 
+  // 100 ms moving-average filter on flywheel velocity (5 samples × 20 ms loop)
+  private final LinearFilter m_velocityFilter = LinearFilter.movingAverage(5);
+  private double m_filteredVelocity = 0;
+
   public Turret() {
-    motorLeft    = new TalonFX(Constants.CAN_IDS.turretMotorLeft,     "FRC 1599B");
-    motorRight   = new TalonFX(Constants.CAN_IDS.turretMotorRight,    "FRC 1599B");
+    flywheelLeft    = new TalonFX(Constants.CAN_IDS.turretMotorLeft,     "FRC 1599B");
+    flywheelRight   = new TalonFX(Constants.CAN_IDS.turretMotorRight,    "FRC 1599B");
     motorRotator = new TalonFX(Constants.CAN_IDS.turretMotorRotator,  "FRC 1599B");
     turretEncoder = new CANcoder(Constants.CAN_IDS.turretEncoder,     "FRC 1599B");
 
     // Flywheel motors
     MotorOutputConfigs coastConfig = new MotorOutputConfigs();
     coastConfig.NeutralMode = NeutralModeValue.Coast;
-    motorLeft.getConfigurator().apply(coastConfig);
+    flywheelLeft.getConfigurator().apply(coastConfig);
 
     MotorOutputConfigs invertConfig = new MotorOutputConfigs();
     invertConfig.NeutralMode = NeutralModeValue.Coast;
     invertConfig.Inverted = InvertedValue.Clockwise_Positive;
-    motorRight.getConfigurator().apply(invertConfig);
+    flywheelRight.getConfigurator().apply(invertConfig);
 
     Slot0Configs spinMotorConfigs = new Slot0Configs();
     spinMotorConfigs.kP = Constants.Turret.FLYWHEEL_KP;
     spinMotorConfigs.kI = Constants.Turret.FLYWHEEL_KI;
     spinMotorConfigs.kD = Constants.Turret.FLYWHEEL_KD;
-    motorLeft.getConfigurator().apply(spinMotorConfigs);
-    motorRight.getConfigurator().apply(spinMotorConfigs);
+    flywheelLeft.getConfigurator().apply(spinMotorConfigs);
+    flywheelRight.getConfigurator().apply(spinMotorConfigs);
 
     // Rotator motor — CTRE closed-loop with remote CANcoder feedback
     TalonFXConfiguration conf = new TalonFXConfiguration();
@@ -88,7 +94,8 @@ public class Turret extends SubsystemBase {
     motorRotator.getConfigurator().apply(conf);
 
     // Cache signal references — avoids repeated object allocation in hot path
-    m_leftVelocity   = motorLeft.getVelocity();
+    m_flywheelLeftVelocity  = flywheelLeft.getVelocity();
+    m_flywheelRightVelocity = flywheelRight.getVelocity();
     m_rotatorPosition = motorRotator.getPosition();
     m_rotatorCurrent  = motorRotator.getSupplyCurrent();
 
@@ -145,9 +152,9 @@ public class Turret extends SubsystemBase {
     motorHoodLeft.setPosition(hoodUp ? Constants.Turret.HOOD_UP_POS : Constants.Turret.HOOD_DOWN_POS);
   }
 
-  /** Returns flywheel velocity in RPS (left motor). Uses cached, refreshed signal. */
+  /** Returns the 100 ms moving-average flywheel velocity in RPS. Updated once per periodic. */
   public double getVelocity() {
-    return m_leftVelocity.getValueAsDouble();
+    return m_filteredVelocity;
   }
 
   public void spinAtDistance() {
@@ -160,8 +167,8 @@ public class Turret extends SubsystemBase {
 
   public void spin(double speed) {
     targetVelocity = speed;
-    motorLeft.setControl(m_velocityRequest.withVelocity(targetVelocity));
-    motorRight.setControl(m_velocityRequest.withVelocity(targetVelocity));
+    flywheelLeft.setControl(m_velocityRequest.withVelocity(targetVelocity));
+    flywheelRight.setControl(m_velocityRequest.withVelocity(targetVelocity));
   }
 
   public void clearZeroCurrents() {
@@ -213,8 +220,8 @@ public class Turret extends SubsystemBase {
   }
 
   public void stopShooter() {
-    motorLeft.set(0);
-    motorRight.set(0);
+    flywheelLeft.set(0);
+    flywheelRight.set(0);
   }
 
   public void stopRotator() {
@@ -228,8 +235,8 @@ public class Turret extends SubsystemBase {
   }
 
   public void runAtPower(double power) {
-    motorLeft.set(power);
-    motorRight.set(power);
+    flywheelLeft.set(power);
+    flywheelRight.set(power);
   }
 
   /**
@@ -246,7 +253,9 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     // Refresh all cached signals at the top of periodic — never read stale values
-    BaseStatusSignal.refreshAll(m_leftVelocity, m_rotatorPosition, m_rotatorCurrent);
+    BaseStatusSignal.refreshAll(m_flywheelLeftVelocity, m_flywheelRightVelocity, m_rotatorPosition, m_rotatorCurrent);
+    double rawVelocity = (m_flywheelLeftVelocity.getValueAsDouble() + m_flywheelRightVelocity.getValueAsDouble()) / 2.0;
+    m_filteredVelocity = m_velocityFilter.calculate(rawVelocity);
 
     SmartDashboard.putNumber("Turret/position_rot", m_rotatorPosition.getValueAsDouble());
     SmartDashboard.putNumber("Turret/angle_deg",    getAngle());
