@@ -21,9 +21,8 @@ public class ManualClimb extends Command {
   }
 
   @Override
-  public void end(boolean interrupted)
-  {
-    climb.holdPosition();
+  public void end(boolean interrupted) {
+    climb.driveAtSpeed(0);
   }
 
   @Override

@@ -16,11 +16,6 @@ public class RunIntake extends Command {
   }
 
   @Override
-  public void initialize() {
-    intake.intake();
-  }
-
-  @Override
   public void execute() {
     intake.intake();
   }

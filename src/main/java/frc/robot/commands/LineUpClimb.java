@@ -18,8 +18,8 @@ public class LineUpClimb extends Command {
   private final CommandSwerveDrivetrain drivetrain;
   private final SwerveRequest.FieldCentric drive;
   private final Pose2d pose;
-  private double maxSpeed;
-  private double maxRotation;
+  private final double maxSpeed    = Constants.Drive.MAX_SPEED_MPS;
+  private final double maxRotation = Constants.Drive.MAX_ANGULAR_RATE_RPS;
 
   public LineUpClimb(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;

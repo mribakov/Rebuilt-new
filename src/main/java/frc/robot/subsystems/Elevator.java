@@ -222,6 +222,15 @@ public class Elevator extends SubsystemBase {
         });
     }
 
+    /**
+     * Directly commands the elevator to a setpoint each cycle.
+     * Call from a command's execute() method — not a command factory.
+     */
+    public void setTargetSetpoint(Setpoint setpoint) {
+        setpointRequest.withPosition(setpoint.target);
+        motor_id_31.setControl(setpointRequest);
+    }
+
     public void driveAtSpeed(double speed)
     {
         motor_id_31.set(speed);

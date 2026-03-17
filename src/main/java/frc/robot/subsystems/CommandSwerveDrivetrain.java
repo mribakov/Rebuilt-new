@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -33,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.generated.Pigeon;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -146,38 +146,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        RobotConfig config;
-        try{
-            config = RobotConfig.fromGUISettings();
-            AutoBuilder.configure(
-            this::getPose,
-            this::resetPose,
-            this::getRobotRelativeSpeeds,
-            (speeds, feedforwards) -> setControl(
-                    m_pathApplyRobotSpeeds.withSpeeds(speeds)
-                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                 ),
-                new PPHolonomicDriveController(
-                    // PID constants for translation
-                    new PIDConstants(10, 0, 0),
-                    // PID constants for rotation
-                    new PIDConstants(7, 0, 0)
-                ),
-            config,
-            () -> {
-
-                var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
-                return false;
-            },
-            this
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         configureAutoBuilder();
     }
 
@@ -195,7 +163,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         SmartDashboard.putNumber("drive x ", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("drive y ", speeds.vyMetersPerSecond);
-        System.out.printf("running drive now %f %f\n", speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
         double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 4; // kSpeedAt12Volts desired top speed
         double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -319,17 +286,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+        BaseStatusSignal.refreshAll(p.getYaw(), p.getPitch(), p.getRoll());
         SmartDashboard.putNumber("pigeon yaw", p.getYaw().getValueAsDouble());
         SmartDashboard.putNumber("pigeon pitch", p.getPitch().getValueAsDouble());
         SmartDashboard.putNumber("pigeon roll", p.getRoll().getValueAsDouble());
 
-        // Feed limelight MegaTag2 pose into the pose estimator
-        LimelightHelpers.SetRobotOrientation("limelight-turret",
+        // Feed limelight-climb MegaTag2 pose into the pose estimator
+        LimelightHelpers.SetRobotOrientation("limelight-climb",
             getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
         if (DriverStation.getAlliance().get() == Alliance.Blue)
-            savePose(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-turret"));
+            savePose(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-climb"));
         else
-            savePose(LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-turret"));
+            savePose(LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-climb"));
     }
     
     private void configureAutoBuilder(){
