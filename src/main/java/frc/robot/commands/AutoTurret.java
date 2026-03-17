@@ -100,6 +100,11 @@ public class AutoTurret extends Command {
     }
     else
     {
+        if (target == null) {
+          // Zone has no registered target — hold position and don't fire
+          trigger.stop();
+          return;
+        }
         if (getZone(pose) == 4) {
           turret.setHoodPosition(false);
         } else {
@@ -123,6 +128,12 @@ public class AutoTurret extends Command {
             trigger.stop();
         }
     }
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    turret.stopRotator();
+    trigger.stop();
   }
 
   @Override

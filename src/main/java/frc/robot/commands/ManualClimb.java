@@ -18,13 +18,12 @@ public class ManualClimb extends Command {
   //maybe explain what both values mean.
   @Override
   public void initialize() {
-    climb.driveAtSpeed(goUp ? 0.30 : -0.60); //-0.12
+    climb.driveAtSpeed(goUp ? Constants.Climber.MANUAL_UP_SPEED : Constants.Climber.MANUAL_DOWN_SPEED);
   }
 
   @Override
-  public void end(boolean interrupted)
-  {
-    climb.holdPosition();
+  public void end(boolean interrupted) {
+    climb.driveAtSpeed(0);
   }
 
   @Override

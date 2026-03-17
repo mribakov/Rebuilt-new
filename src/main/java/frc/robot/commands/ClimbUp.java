@@ -14,12 +14,13 @@ public class ClimbUp extends Command {
   }
 
   @Override
-  public void initialize() {
-    climb.goToSetpoint(() -> {return Elevator.Setpoint.Middle;});
+  public void execute() {
+    climb.setTargetSetpoint(Elevator.Setpoint.Middle);
   }
 
   @Override
   public boolean isFinished() {
-    return Math.abs(climb.getPosition().magnitude() - Elevator.Setpoint.Middle.target.magnitude()) <= Constants.Climber.threshold; // meeseeks
+    return Math.abs(climb.getPosition().magnitude() - Elevator.Setpoint.Middle.target.magnitude())
+        <= Constants.Climber.SETPOINT_THRESHOLD_ROT;
   }
 }

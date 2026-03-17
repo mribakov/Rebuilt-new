@@ -8,7 +8,7 @@ public class Pigeon {
     private Pigeon2 m_pigeon;
 
     public Pigeon(int id) {
-        m_pigeon = new Pigeon2(id, "1599-B");
+        m_pigeon = new Pigeon2(id, "FRC 1599B");
     }
 
     public double getAngle() {

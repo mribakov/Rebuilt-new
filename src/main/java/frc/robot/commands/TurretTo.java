@@ -4,8 +4,7 @@
 
 package frc.robot.commands;
 
-import java.util.function.Supplier;
-
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Turret;
@@ -13,6 +12,8 @@ import frc.robot.subsystems.Turret;
 public class TurretTo extends Command {
   private Turret turret;
   private double ang;
+  // 4-cycle (80 ms) debounce — command only finishes after holding within tolerance for 4 consecutive cycles
+  private final Debouncer m_atAngleDebouncer = new Debouncer(4 * 0.02, Debouncer.DebounceType.kRising);
 
   public TurretTo(Turret turret, double ang) {
     this.turret = turret;
@@ -39,6 +40,6 @@ public class TurretTo extends Command {
 
   @Override
   public boolean isFinished() {
-    return Math.abs(turret.getAngle() - ang) < Constants.Turret.angleThreshold;
+    return m_atAngleDebouncer.calculate(Math.abs(turret.getAngle() - ang) < Constants.Turret.ANGLE_THRESHOLD_DEG);
   }
 }

@@ -3,110 +3,251 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
-import static edu.wpi.first.units.Units.*;
 
+import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.generated.TunerConstants;
 
-/** Add your docs here. */
+/**
+ * Robot-wide constants organized by subsystem.
+ *
+ * ── CAN IDs ──────────────────────── all bus IDs in one place
+ * ── Turret ───────────────────────── flywheel, rotator, hood, zeroing
+ * ── Intake ───────────────────────── deploy positions, PID, manual speeds
+ * ── Trigger ──────────────────────── index / kickup duty cycles
+ * ── Climber ──────────────────────── elevator speeds and tolerances
+ * ── Vision (Limelight) ───────────── camera name, distance model, aim speeds
+ * ── Drive ────────────────────────── swerve speed limits, deadband
+ */
 public class Constants {
 
-    public class CAN_IDS {
-        public static final int pigeon = 20;
-        public static final int fuelTankMotor = 21;
-        public static final int feedIntakeMotor = 22;
-        public static final int indexMotor = 23;
-        public static final int deployMotor = 24;
-        public static final int turretMotorRight = 25;
-        public static final int turretMotorLeft = 40;
+    // =========================================================================
+    // CAN IDs  (bus: "FRC 1599B")
+    // =========================================================================
+    public static class CAN_IDS {
+        // Infrastructure
+        public static final int pigeon             = 20;
+
+        // Intake
+        public static final int feedIntakeMotor    = 22;
+        public static final int deployMotor        = 24;
+        public static final int deployEncoder      = 33;
+
+        // Trigger (index + kickup)
+        public static final int indexMotor         = 23;
+        public static final int kickUpMotor        = 28;
+
+        // Turret
+        public static final int turretMotorLeft    = 40;
+        public static final int turretMotorRight   = 25;
         public static final int turretMotorRotator = 27;
-        public static final int kickUpMotor = 28;
-        public static final int tankMotorLeft = 29;
-        public static final int tankMotorRight = 30;
-        public static final int climberMotor = 31;
-        public static final int turretEncoder = 32;
-        public static final int deployEncoder = 33;
-        public static final int climberEncoder = 34;
+        public static final int turretEncoder      = 32;
 
-    }
-    
-    public class Channels {
-        public static final int motorHoodLeft = 5;
-        //public static final int motorHoodRight = 1;
-        
+        // Climber
+        public static final int climberMotor       = 31;
+        public static final int climberEncoder     = 34;
     }
 
-    public class Wrist {
-        public static final double[] wristLimit =  new double[] {330, 30};
-        public static final double wristEncoderOffset = 0.351;
-        public static final double P = 0.1;
-        public static final double I = 0;
-        public static final double D = 0;
+    // =========================================================================
+    // Turret
+    // =========================================================================
+    public static class Turret {
+
+        // --- Hardware ---
+        /** PWM channel for the hood servo. */
+        public static final int HOOD_SERVO_CHANNEL = 5;
+
+        // --- Mechanical ---
+        /** Motor-to-encoder gear ratio for the rotator. */
+        public static final double GEAR_RATIO       = 10.0;
+        /** Minimum allowed turret angle in degrees (soft limit). */
+        public static final double MIN_ANGLE_DEG    = 8.0;
+        /** Maximum allowed turret angle in degrees (soft limit). */
+        public static final double MAX_ANGLE_DEG    = 120.0;
+        /** Angle tolerance for "at setpoint" checks (degrees). */
+        public static final double ANGLE_THRESHOLD_DEG = 2.0;
+
+        // --- Flywheel speed ---
+        /** Minimum flywheel velocity (RPS) before the trigger may fire. */
+        public static final double MIN_FIRE_SPEED_RPS   = 30.0;
+        /** isAtSpeed() tolerance band (RPS). */
+        public static final double SHOOTER_THRESHOLD_RPS = 5.0;
+        /** Delay (seconds) between reaching speed and starting the feed. */
+        public static final double AUTO_SHOOT_FEED_DELAY_SECS = 0.3;
+
+        // --- Distance → speed map  (Limelight distance units) ---
+        public static final double DIST_CLOSE_FT  = 10.0;
+        public static final double SPEED_CLOSE_RPS = 55.0;
+        public static final double DIST_MID_FT    = 20.0;
+        public static final double SPEED_MID_RPS  = 58.0;
+        public static final double DIST_FAR_FT    = 35.0;
+        public static final double SPEED_FAR_RPS  = 75.0;
+
+        // Legacy aliases used in auto routines (kept for backwards compat)
+        public static final double distClose  = DIST_CLOSE_FT;
+        public static final double speedClose = SPEED_CLOSE_RPS;
+        public static final double distMid    = DIST_MID_FT;
+        public static final double speedMid   = SPEED_MID_RPS;
+        public static final double distFar    = DIST_FAR_FT;
+        public static final double speedFar   = SPEED_FAR_RPS;
+
+        // --- Rotator PID  (CTRE Slot 0) ---
+        public static final double ROTATOR_KP = 0.1;
+        public static final double ROTATOR_KI = 0.0;
+        public static final double ROTATOR_KD = 0.0;
+
+        // --- Flywheel PID  (CTRE Slot 0) ---
+        public static final double FLYWHEEL_KP = 0.64;
+        public static final double FLYWHEEL_KI = 0.0;
+        public static final double FLYWHEEL_KD = 0.0;
+
+        // --- Manual rotation ---
+        /** Duty-cycle scalar applied to joystick input for manual rotation. */
+        public static final double ROTATE_OUTPUT_SCALE = 0.15;
+        /** Joystick deadband — inputs below this magnitude are ignored. */
+        public static final double MANUAL_DEADBAND     = 0.08;
+
+        // --- Homing / zeroing ---
+        /** Duty cycle applied while driving toward the hard stop. */
+        public static final double ZERO_POWER              = -0.08;
+        /** Supply current (A) that indicates the rotator has stalled. */
+        public static final double ZERO_STALL_CURRENT_AMPS =  1.25;
+        /** Per-sample current delta (A) used in stall detection. */
+        public static final double ZERO_CURRENT_DELTA_AMPS =  0.1;
+
+        // --- Hood servo ---
+        /** Servo position (0–1) for hood-up (long shot). */
+        public static final double HOOD_UP_POS   = 0.8;
+        /** Servo position (0–1) for hood-down (close shot). */
+        public static final double HOOD_DOWN_POS = 0.0;
     }
 
-    public class Turret {
-        public static final double minAngle = 8;
-        public static final double maxAngle = 120;
-        public static final double shooterThreshold = 0;
-        public static final double angleThreshold = 2;
-        public static final double autoShootFeedDelay = 0.3; // seconds to wait after turret reaches speed before running kickup and index
+    // =========================================================================
+    // Intake
+    // =========================================================================
+    public static class Intake {
 
-        // Distance-based flywheel speed map - TODO: tune all values
-        // Distance units match Limelight.getDistance() (derived from ta via power-law formula)
-        public static final double distClose  = 10.0;  // distance unit - close range
-        public static final double speedClose = 55.0; // RPS
-        public static final double distMid    = 20.0;  // distance unit - mid range
-        public static final double speedMid   = 58.0; // RPS
-        public static final double distFar    = 35.0;  // distance unit - far range
-        public static final double speedFar   = 75.0;  // RPS
+        // --- Wheel speed ---
+        /** Full-power intake duty cycle. */
+        public static final double INTAKE_SPEED = 1.0;
+
+        // --- Deploy motor positions (rotations, internal encoder) ---
+        /** Position when intake is fully deployed (down). */
+        public static final double DEPLOY_POS_ROT  = -0.7;
+        /** Position when intake is fully retracted (up). */
+        public static final double RETRACT_POS_ROT = -0.9;
+
+        // --- Position tolerances ---
+        /** Command completes when error is within this band (rotations). */
+        public static final double POSITION_TOLERANCE_ROT = 0.035;
+        /** Positions with |value| below this use Slot 0 (near-home hold). */
+        public static final double SLOT_SELECT_THRESHOLD  = 0.015;
+
+        // --- Deploy motor PID  (CTRE) ---
+        /** Slot 0 kP — strong hold near the home position. */
+        public static final double DEPLOY_SLOT0_KP = 5.0;
+        /** Slot 1 kP — softer gain for travel to deploy/retract positions. */
+        public static final double DEPLOY_SLOT1_KP = 1.5;
+
+        // --- Manual / timed deploy ---
+        /** Duty cycle for timed manual deploy moves. */
+        public static final double DEPLOY_MANUAL_SPEED = 0.15;
+        /** Time (seconds) to run deploy motor during DeployIntake. */
+        public static final double DEPLOY_WAIT_SECS    = 1.2;
+
+        // --- DeployJumpCommand oscillation ---
+        /** Time (seconds) spent driving intake upward per cycle. */
+        public static final double JUMP_UP_DURATION_SECS   = 0.62;
+        /** Time (seconds) spent driving intake downward per cycle. */
+        public static final double JUMP_DOWN_DURATION_SECS = 0.45;
+        /** Duty cycle magnitude for jump oscillation. */
+        public static final double JUMP_SPEED               = 0.22;
     }
 
-    public class Intake {
-        public static final double deployPosition = 25; // angle in degrees
-        public static final double homePosition = 1;
-        public static final double intakeSpeed = 1;
-        public static final double intakeEncoderOffset = 0;
-        public static final double deployLowThreshold = 0;
-        public static final double deployHighThreshold = .3;
+    // =========================================================================
+    // Trigger  (index motor + kickup motor)
+    // =========================================================================
+    public static class Trigger {
+        /** Duty cycle for shooting direction. */
+        public static final double SHOOT_SPEED   =  1.0;
+        /** Duty cycle for reverse (unjam) direction. */
+        public static final double REVERSE_SPEED = -1.0;
     }
 
-    public class Climber {
-        public static final double threshold = 0.15;
+    // =========================================================================
+    // Climber  (elevator)
+    // =========================================================================
+    public static class Climber {
+        /** Position tolerance (rotations) for ClimbUp/ClimbDown setpoint checks. */
+        public static final double SETPOINT_THRESHOLD_ROT = 0.15;
+
+        // --- LineUpClimb vision alignment ---
+        /** Proportional gain for the lateral alignment P controller. */
+        public static final double LINEUP_P           = 0.2;
+        /** Lateral error (meters) considered "aligned" — ends LineUpClimb. */
+        public static final double LINEUP_THRESHOLD_M = 0.2;
+
+        // --- ManualClimb duty cycles ---
+        /** Duty cycle when climbing up. */
+        public static final double MANUAL_UP_SPEED   =  0.30;
+        /** Duty cycle when climbing down (negative = downward). */
+        public static final double MANUAL_DOWN_SPEED = -0.60;
     }
 
-    public class TriggerPositions {
+    // =========================================================================
+    // Vision  (Limelight)
+    // =========================================================================
+    public static class LimelightConstants {
+        /** NetworkTables name of the turret-facing Limelight. */
+        public static final String TURRET_LIMELIGHT_NAME = "limelight-turret";
 
+        // --- Distance model:  distance = DISTANCE_SCALE * ta ^ DISTANCE_EXPONENT ---
+        public static final double DISTANCE_SCALE      = 46.39986;
+        public static final double DISTANCE_EXPONENT   = -0.4918478;
+        /** ta values above this threshold are too close to use for ranging. */
+        public static final double MAX_TA_FOR_DISTANCE = 24.0;
+
+        // --- Turret auto-aim thresholds (tx degrees off-center) ---
+        /** Switch from fast to slow rotation below this tx error. */
+        public static final double TX_THRESHOLD_LARGE  = 10.0;
+        /** Stop rotating (consider locked) below this tx error. */
+        public static final double TX_THRESHOLD_SMALL  = 3.0;
+
+        // --- Turret auto-aim output speeds (duty cycle) ---
+        /** Rotation speed when tx error > TX_THRESHOLD_LARGE. */
+        public static final double TURRET_SPEED_FAST   = 0.15;
+        /** Rotation speed when tx error ≤ TX_THRESHOLD_LARGE. */
+        public static final double TURRET_SPEED_SLOW   = 0.07;
     }
 
-    public class HoodPositions {
-
+    // =========================================================================
+    // Field geometry
+    // =========================================================================
+    public static class Field {
+        /** Center of the Blue alliance hub (meters, WPILib origin). */
+        public static final Translation2d BLUE_HUB = new Translation2d(4.611, 4.035);
+        /** Center of the Red alliance hub (meters, WPILib origin). */
+        public static final Translation2d RED_HUB  = new Translation2d(11.927, 4.035);
     }
 
-    public class Speed {
+    // =========================================================================
+    // Drive  (swerve drivetrain)
+    // =========================================================================
+    public static class Drive {
+        /** Top speed (m/s) — sourced from TunerConstants at full 12 V. */
+        public static final double MAX_SPEED_MPS      = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        /** Max angular rate (rad/s). */
+        public static final double MAX_ANGULAR_RATE_RPS = RotationsPerSecond.of(0.5).in(RadiansPerSecond);
 
-    }
-    /*
-     * lime light values =======================================
-     * scale = 46.39986
-     * distance = (scale / ta)
-     */
-    public class Properties {
+        /** Fraction of max speed/rate applied as joystick deadband. */
+        public static final double DEADBAND_PERCENT   = 0.14;
 
-        public static double intakeVelocity = .5;
-        public static double outtakeVelocity = -.5;
-        
-    }
-  
-    
-    public class Drive {
-        public static boolean SpeedToggle = true; //true = fast, false = slow
-        public static double Speed = 1;
-        public static double maxSpeed = 1;
-        public static double minSpeed = 3.5; // the value is what the speed is being divided by
-        
-        public static double MaxSpeed = (TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)); // kSpeedAt12Volts desired top speed 6 wads slow
-        public static double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 1/2 of a rotation per second max
+        // --- Speed scaling (used in drive default command) ---
+        /** Current speed divisor (1.0 = full speed). Increase for a slower mode. */
+        public static final double SPEED_DIVISOR      = 1.0;
+
+        // Legacy aliases referenced in RobotContainer default-command formula
+        public static final double MaxSpeed  = MAX_SPEED_MPS;
+        public static final double Speed     = SPEED_DIVISOR;
     }
 }
-

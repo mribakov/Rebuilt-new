@@ -28,7 +28,7 @@ public class RobotContainer {
 
     // subsystems
     private Elevator climber;
-    private static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private Intake intake;
     private Trigger trigger;
     private Turret turret;
@@ -40,7 +40,7 @@ public class RobotContainer {
         return field;
     }
     
-    public static Pose2d getCurrentPose() {
+    public Pose2d getCurrentPose() {
         return drivetrain.getState().Pose;
     }
 
@@ -54,7 +54,7 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.14).withRotationalDeadband(MaxAngularRate * 0.14) // Add a 10% deadband
+            .withDeadband(MaxSpeed * Constants.Drive.DEADBAND_PERCENT).withRotationalDeadband(MaxAngularRate * Constants.Drive.DEADBAND_PERCENT)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -66,11 +66,6 @@ public class RobotContainer {
     public final CommandXboxController Player2 = new CommandXboxController(1);
 
 
-    public int GreenArcade = 1;
-    public int RedArcade = 2;
-    public int BlueArcade = 3;
-    
-    
     public RobotContainer() {
 
       
@@ -81,13 +76,6 @@ public class RobotContainer {
         
         //AUTO CHOOSER CREATION.
         autoChooser = AutoCommands.buildAutoChooser(drivetrain, drive, MaxSpeed, MaxAngularRate, turret, trigger, intake);
-
-        // line to feeder, 3.4 m (133 in)
-        
-
-    // Define zones as bounding boxes
-    //boolean Zone0 = pose.getX() >= 491 && pose.getY() > 108;
-    //boolean Zone1 = pose.getX() > 14.0;
 
         SmartDashboard.putData("Field", field);
 
@@ -127,19 +115,6 @@ public class RobotContainer {
     }
 
     private void configureDrivetrain() {
-        // drivetrain
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-getLeftY() * MaxSpeed) // Drive forward with
-                                                                                                   // negative Y
-                                                                                                   // (forward)
-                        .withVelocityY(-getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-getRightX() * MaxAngularRate) // Drive counterclockwise with
-                                                                                    // negative X (left)
-        ));
-
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
@@ -147,16 +122,9 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
         
-        //().whileTrue(drivetrain.applyRequest(() -> brake));
         Player1.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-Player1.getLeftY(), -Player1.getLeftX()))
         ));
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-       
-        // reset the field-centric heading on left bumper press
-        //joystick.leftBumper().onTrue(new runIntake(intake, 0.5));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -218,8 +186,8 @@ public class RobotContainer {
 
         Player1.x().onTrue(new DeployIntake(intake)); // deploy
         Player1.y().onTrue(new RetractIntake(intake)); // retract
-        Player1.a().whileTrue(new ManualDeploy(intake, 0.15)); // down
-        Player1.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
+        Player1.a().whileTrue(new ManualDeploy(intake, Constants.Intake.DEPLOY_MANUAL_SPEED)); // down
+        Player1.b().whileTrue(new ManualDeploy(intake, -Constants.Intake.DEPLOY_MANUAL_SPEED)); // up
 
         Player1.rightTrigger().whileTrue(new ParallelCommandGroup(
             new DeployJumpCommand(intake),
@@ -228,18 +196,16 @@ public class RobotContainer {
         )); // shoot and kick up, shooter first then kickup
 
         Player1.povUp().onTrue(new StopTurretWheels(turret));
-        Player1.rightBumper().whileTrue(new ReverseShoot(turret, trigger));
+        Player1.rightBumper().whileTrue(new ReverseShoot(trigger));
 
         Player1.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
-        //Player1.leftBumper().toggleOnTrue(new AutoTurret(turret, trigger, drivetrain)); //auto turret
-        //TODO: manual hood, and turret rotator
         Player1.leftBumper().toggleOnTrue(new TurnTurret(turret));
 
         //Player 2 controls
         Player2.x().onTrue(new DeployIntake(intake)); // deploy
         Player2.y().onTrue(new RetractIntake(intake)); // retract
-        Player2.a().whileTrue(new ManualDeploy(intake, 0.15)); // down
-        Player2.b().whileTrue(new ManualDeploy(intake, -0.15)); // up
+        Player2.a().whileTrue(new ManualDeploy(intake, Constants.Intake.DEPLOY_MANUAL_SPEED)); // down
+        Player2.b().whileTrue(new ManualDeploy(intake, -Constants.Intake.DEPLOY_MANUAL_SPEED)); // up
 
         Player2.rightTrigger().whileTrue(new ParallelCommandGroup(
             new DeployJumpCommand(intake),
@@ -248,7 +214,7 @@ public class RobotContainer {
         )); // shoot and kick up, shooter first then kickup
 
         Player2.povUp().onTrue(new StopTurretWheels(turret));
-        Player2.rightBumper().whileTrue(new ReverseShoot(turret, trigger));
+        Player2.rightBumper().whileTrue(new ReverseShoot(trigger));
 
         Player2.leftTrigger().whileTrue(new RunIntake(intake)); // intake in
 

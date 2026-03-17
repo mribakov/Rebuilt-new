@@ -4,33 +4,29 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.subsystems.Intake;
 
-public class DeployIntake extends Command {
-  private final Intake intake;
-  private final Timer timer = new Timer();
-
-  public DeployIntake(Intake in) {
-    intake = in;
-    addRequirements(in);
+public class RunOuttake extends Command {
+  Intake intake;
+  
+  public RunOuttake(Intake in) {
+   intake = in;
+   addRequirements(in);
   }
 
   @Override
   public void initialize() {
-    timer.restart();
-    intake.deployManual(Constants.Intake.DEPLOY_MANUAL_SPEED);
+    intake.outtake();
   }
 
   @Override
   public void end(boolean interrupted) {
-    intake.stopDeploy();
+    intake.stopWheels();
   }
 
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(Constants.Intake.DEPLOY_WAIT_SECS);
+    return false;
   }
 }
