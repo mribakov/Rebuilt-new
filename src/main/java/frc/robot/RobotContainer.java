@@ -78,7 +78,7 @@ public class RobotContainer {
         // NamedCommands must be registered before AutoBuilder loads autos
         mapEventsToCommands();
 
-        autoChooser = AutoBuilder.buildAutoChooser("Just Shoot");
+        autoChooser = AutoBuilder.buildAutoChooser("Ribakov1");
 
         SmartDashboard.putData("Field", field);
 
