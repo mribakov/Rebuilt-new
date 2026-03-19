@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -14,7 +13,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.controllers.PPLTVController;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -29,9 +27,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -136,10 +132,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     ) {
         
         super(drivetrainConstants, modules);
+        setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
         configureAutoBuilder();
     }
 
@@ -178,6 +174,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
+        setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -209,11 +206,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         Matrix<N3, N1> odometryStandardDeviation,
         Matrix<N3, N1> visionStandardDeviation,
         SwerveModuleConstants<?, ?, ?>... modules
-
-        
-    
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
+        setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -271,13 +266,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-        // Feed limelight-climb MegaTag2 pose into the pose estimator
-        LimelightHelpers.SetRobotOrientation("limelight-left",
-            getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue)
-            savePose(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left"));
-        else
-        savePose(LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left"));
+        // Feed blended MegaTag2 pose estimate from limelight-left and limelight-forward
+        double heading = getState().Pose.getRotation().getDegrees();
+        LimelightHelpers.SetRobotOrientation("limelight-left", heading, 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation("limelight-forward", heading, 0, 0, 0, 0, 0);
+        boolean isBlue = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+        LimelightHelpers.PoseEstimate left = isBlue
+            ? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left")
+            : LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left");
+        LimelightHelpers.PoseEstimate forward = isBlue
+            ? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-forward")
+            : LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-forward");
+        savePose(blendEstimates(left, forward));
     }
     
     private void configureAutoBuilder(){
@@ -362,14 +362,48 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     /**
+     * Blends two PoseEstimates weighted by tagCount * avgTagArea.
+     * Returns the higher-quality estimate alone if the other has no tags.
+     */
+    private LimelightHelpers.PoseEstimate blendEstimates(LimelightHelpers.PoseEstimate a, LimelightHelpers.PoseEstimate b) {
+        double qualityA = (a != null) ? a.tagCount * a.avgTagArea : 0;
+        double qualityB = (b != null) ? b.tagCount * b.avgTagArea : 0;
+        double totalQuality = qualityA + qualityB;
+        if (totalQuality == 0) return null;
+        if (qualityA == 0) return b;
+        if (qualityB == 0) return a;
+
+        double wA = qualityA / totalQuality;
+        double wB = qualityB / totalQuality;
+
+        double x = wA * a.pose.getX() + wB * b.pose.getX();
+        double y = wA * a.pose.getY() + wB * b.pose.getY();
+        Rotation2d rotation = a.pose.getRotation().interpolate(b.pose.getRotation(), wB);
+
+        // Use the timestamp from whichever camera has the higher quality
+        double timestamp = qualityA >= qualityB ? a.timestampSeconds : b.timestampSeconds;
+
+        return new LimelightHelpers.PoseEstimate(
+            new Pose2d(x, y, rotation),
+            timestamp,
+            Math.max(a.latency, b.latency),
+            a.tagCount + b.tagCount,
+            Math.max(a.tagSpan, b.tagSpan),
+            Math.min(a.avgTagDist, b.avgTagDist),
+            (qualityA * a.avgTagArea + qualityB * b.avgTagArea) / totalQuality,
+            new LimelightHelpers.RawFiducial[]{},
+            true
+        );
+    }
+
+    /**
      * Injects a fresh MegaTag2 pose into the Kalman filter.
      * Only applied when a valid, non-zero estimate with visible tags is received.
      */
-    public void savePose(LimelightHelpers.PoseEstimate mt2) {
+    private void savePose(LimelightHelpers.PoseEstimate mt2) {
         if (mt2 == null || mt2.tagCount == 0) return;
-        if (mt2.pose.getX() + mt2.pose.getY() == 0) return;
-        setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        super.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        if (mt2.pose.getX() == 0 && mt2.pose.getY() == 0) return;
+        super.addVisionMeasurement(mt2.pose, Utils.fpgaToCurrentTime(mt2.timestampSeconds));
     }
 
 }
